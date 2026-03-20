@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Life OS"/>
+<meta name="theme-color" content="#07080d"/>
+<title>Life OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg0:#07080d;--bg1:#0c0e15;--bg2:#10131c;--bg3:#151824;--bg4:#1b1f2e;--bg5:#222639;
+--purple:#8b6fd4;--purple2:#a98df0;--purple3:#c4b2f8;--purpleDim:#1e1735;
+--blue:#3d82e8;--blue2:#62a0ff;--blue3:#a8caff;--blueDim:#122040;
+--green:#28c97a;--green2:#42e896;--green3:#90ffcc;--greenDim:#0a2a1a;
+--amber:#e8a020;--amber2:#f5bc4a;--amberDim:#2a1e00;
+--red:#e84040;--red2:#ff6b6b;--redDim:#2a0e0e;
+--teal:#20c9c0;--pink:#e060a8;
+--t1:#e8edf8;--t2:#9aa3bc;--t3:#5a6280;--t4:#363d58;
+--b1:#1e2338;--b2:#272d45;--b3:#323a58;
+--font-body:'DM Sans',system-ui,sans-serif;
+--font-mono:'JetBrains Mono','Courier New',monospace;
+--r1:4px;--r2:8px;--r3:12px;--r4:18px;
+}
+html{font-size:14px}
+body{font-family:var(--font-body);background:var(--bg0);color:var(--t1);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+button{cursor:pointer;border:none;background:none;font-family:var(--font-body);color:inherit}
+input,textarea,select{font-family:var(--font-body);color:var(--t1);background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r2);padding:9px 12px;font-size:13px;outline:none;width:100%;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,111,212,.15)}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+
+/* APP SHELL */
+.app{display:flex;min-height:100vh}
+.mobile-bar{display:none;position:sticky;top:0;z-index:50;background:var(--bg1);border-bottom:1px solid var(--b1);padding:0 16px;height:52px;align-items:center;justify-content:space-between}
+.mobile-logo{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--t1);letter-spacing:.08em}
+.mobile-logo span{color:var(--purple2)}
+.hamburger{width:36px;height:36px;border-radius:var(--r2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:var(--bg3);border:1px solid var(--b2)}
+.hamburger span{display:block;width:16px;height:1.5px;background:var(--t2);border-radius:1px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;opacity:0;transition:opacity .2s}
+.overlay.open{opacity:1}
+
+/* SIDEBAR */
+.sidebar{width:230px;background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;z-index:110;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid var(--b1)}
+.logo-wm{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--t1);letter-spacing:.08em}
+.logo-wm span{color:var(--purple2)}
+.logo-tag{font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.sidebar-profile{padding:13px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s}
+.sidebar-profile:hover{background:var(--bg2)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--purpleDim);border:1.5px solid var(--purple);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--purple2);flex-shrink:0;letter-spacing:.05em;user-select:none}
+.pname{font-size:12px;font-weight:500;color:var(--t1);line-height:1.3}
+.prole{font-size:10px;color:var(--t3);line-height:1.3;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-sect{font-size:9px;font-weight:600;color:var(--t4);letter-spacing:.14em;text-transform:uppercase;padding:14px 18px 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;color:var(--t3);font-size:13px;border-left:2px solid transparent;transition:all .12s;user-select:none}
+.nav-item:hover{background:var(--bg2);color:var(--t2)}
+.nav-item.active{background:var(--purpleDim);color:var(--purple3);border-left-color:var(--purple);font-weight:500}
+.nav-icon{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:var(--purple);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px;font-family:var(--font-mono)}
+.sidebar-bottom{padding:13px 18px;border-top:1px solid var(--b1)}
+.streak-wrap{display:flex;align-items:center;gap:9px}
+.streak-num{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--amber2);line-height:1}
+.streak-lbl{font-size:10px;color:var(--t3);margin-top:2px}
+.streak-date{font-size:10px;color:var(--t3);margin-left:auto;font-family:var(--font-mono)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;background:var(--bg0);min-width:0}
+.page{padding:26px 28px;max-width:1060px;animation:fadeIn .22s ease}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.pt{font-size:19px;font-weight:600;color:var(--t1);letter-spacing:-.01em;line-height:1.2}
+.ps{font-size:12px;color:var(--t3);margin-top:4px}
+.pha{display:flex;gap:8px;flex-wrap:wrap}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);padding:18px 20px}
+.card-sm{padding:12px 15px}
+.card-title{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.gauto{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+
+/* STAT CARDS */
+.stat-card{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);padding:15px 12px;text-align:center}
+.sv{font-family:var(--font-mono);font-size:24px;font-weight:700;line-height:1}
+.sl{font-size:9px;color:var(--t3);margin-top:6px;letter-spacing:.07em;text-transform:uppercase}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 15px;border-radius:var(--r2);font-size:13px;font-weight:500;cursor:pointer;transition:all .13s;border:1px solid transparent;white-space:nowrap;user-select:none;line-height:1}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btn-p:hover{background:var(--purple2)}
+.btn-g{background:transparent;color:var(--t2);border-color:var(--b2)}
+.btn-g:hover{background:var(--bg3);color:var(--t1);border-color:var(--b3)}
+.btn-gr{background:var(--green);color:#071a10;border-color:var(--green);font-weight:600}
+.btn-gr:hover{background:var(--green2)}
+.btn-r{background:var(--redDim);color:var(--red2);border-color:var(--red)}
+.btn-r:hover{background:var(--red);color:#fff}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.btn-ic{padding:7px;border-radius:var(--r2)}
+.btn:disabled{opacity:.32;cursor:not-allowed;pointer-events:none}
+
+/* PROGRESS */
+.pw{margin:6px 0}
+.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:5px;align-items:center;gap:6px}
+.pl span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt2{height:5px;background:var(--bg5);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .4s ease}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.tg{background:var(--greenDim);color:var(--green3);border:1px solid rgba(40,201,122,.2)}
+.tp{background:var(--purpleDim);color:var(--purple3);border:1px solid rgba(139,111,212,.2)}
+.tb{background:var(--blueDim);color:var(--blue3);border:1px solid rgba(61,130,232,.2)}
+.ta{background:var(--amberDim);color:var(--amber2);border:1px solid rgba(232,160,32,.2)}
+.tr{background:var(--redDim);color:var(--red2);border:1px solid rgba(232,64,64,.2)}
+.td{background:var(--bg4);color:var(--t3);border:1px solid var(--b2)}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.4s ease-in-out infinite}
+
+/* CHECKLIST */
+.chk-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s;border-radius:4px}
+.chk-row:last-child{border-bottom:none}
+.chk-row:hover{background:var(--bg3);padding-left:4px;padding-right:4px}
+.chk-box{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--b3);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chk-box.done{border-color:var(--green);background:var(--green)}
+.chk-lbl{font-size:13px;color:var(--t1);flex:1;line-height:1.4}
+.chk-lbl.done{color:var(--t3);text-decoration:line-through}
+
+/* SCHEDULE BLOCKS */
+.blk{display:flex;align-items:stretch;border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:7px;transition:border-color .15s}
+.blk:hover{border-color:var(--b3)}
+.blk.blk-now{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.blk.blk-done{opacity:.45}
+.blk-time{background:var(--bg3);border-right:1px solid var(--b1);padding:10px;min-width:76px;max-width:76px;display:flex;flex-direction:column;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--t3);line-height:1.6;flex-shrink:0}
+.blk-stripe{width:3px;flex-shrink:0}
+.blk-body{flex:1;padding:10px 13px;background:var(--bg2);min-width:0}
+.blk-name{font-size:13px;font-weight:500;color:var(--t1);display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.blk-desc{font-size:11px;color:var(--t3);margin-top:3px;line-height:1.5}
+.blk-acts{padding:9px 11px;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:flex-end;background:var(--bg2);flex-shrink:0;min-width:100px}
+.tmono{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--green2);letter-spacing:.04em}
+
+/* NOTES */
+.note{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);padding:13px;margin-bottom:9px;cursor:pointer;transition:border-color .13s}
+.note:hover{border-color:var(--purple)}
+.note.pinned{border-color:var(--amber)}
+.note-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.note-body{font-size:12px;color:var(--t2);line-height:1.55;white-space:pre-line}
+.note-meta{display:flex;gap:7px;align-items:center;margin-top:9px;flex-wrap:wrap}
+.ddot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.schip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:99px;font-size:10px;color:var(--blue2);background:var(--blueDim);border:1px solid rgba(61,130,232,.2)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;padding:60px 16px 24px;z-index:300;overflow-y:auto}
+.modal{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r4);padding:24px;width:520px;max-width:100%;animation:modalIn .18s ease}
+.modal-title{font-size:16px;font-weight:600;color:var(--t1)}
+.fl{display:block;font-size:10px;font-weight:600;color:var(--t3);margin-bottom:5px;letter-spacing:.06em;text-transform:uppercase}
+.fr{margin-bottom:13px}
+
+/* TOGGLE */
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg5);border:1px solid var(--b3);cursor:pointer;position:relative;flex-shrink:0;transition:background .2s,border-color .2s}
+.toggle.on{background:var(--purple);border-color:var(--purple)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--t3);transition:all .2s}
+.toggle.on::after{left:18px;background:#fff}
+
+/* BAR CHART */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar-lbl{font-size:11px;color:var(--t2);width:90px;text-align:right;flex-shrink:0;text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:7px;background:var(--bg5);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .55s ease}
+.bar-pct{font-family:var(--font-mono);font-size:11px;color:var(--t3);width:36px;text-align:right;flex-shrink:0}
+
+/* HEATMAP */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.hc{height:15px;border-radius:3px}
+.h0{background:var(--bg4)}.h1{background:#0d2f1a}.h2{background:#0f5e35}.h3{background:var(--green)}
+
+/* FOCUS */
+.focus-time{font-family:var(--font-mono);font-size:60px;font-weight:700;color:var(--t1);letter-spacing:-2px;line-height:1}
+
+/* EXT APPS */
+.ext-card{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r3);padding:16px 12px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.ext-card:hover{border-color:var(--purple);background:var(--purpleDim);transform:translateY(-2px)}
+.ext-icon{width:36px;height:36px;border-radius:var(--r2);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 9px}
+.ext-name{font-size:12px;font-weight:500;color:var(--t1)}
+.ext-desc{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* PIN LOCK */
+.lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg0);gap:16px;padding:24px}
+.lock-title{font-size:20px;font-weight:600;color:var(--t1)}
+.lock-sub{font-size:13px;color:var(--t3)}
+.pin-dots{display:flex;gap:14px;margin:6px 0}
+.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--b3);background:transparent;transition:all .15s}
+.pin-dot.filled{background:var(--purple);border-color:var(--purple)}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:216px}
+.pin-key{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r2);padding:15px;text-align:center;cursor:pointer;font-family:var(--font-mono);font-size:18px;font-weight:500;color:var(--t1);transition:all .12s;user-select:none}
+.pin-key:hover{background:var(--bg4);border-color:var(--purple)}
+.pin-key:active{transform:scale(.94)}
+.pin-err{color:var(--red2);font-size:12px;animation:shake .3s ease}
+
+/* REMINDER */
+.rem-row{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--b1)}
+.rem-row:last-child{border-bottom:none}
+.rem-time{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1);min-width:44px}
+.rem-days{font-size:10px;color:var(--t3);margin-top:1px}
+
+/* WIZARD */
+.wizard{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg0);padding:24px}
+.wiz-card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r4);padding:36px;width:520px;max-width:100%;animation:fadeIn .3s ease}
+.wiz-step{font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.wiz-title{font-size:22px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.wiz-sub{font-size:13px;color:var(--t2);margin-bottom:24px;line-height:1.6}
+.wiz-dots{display:flex;gap:6px;justify-content:center;margin-top:24px}
+.wiz-dot{width:6px;height:6px;border-radius:50%;background:var(--b3);transition:background .2s}
+.wiz-dot.active{background:var(--purple)}
+.wiz-opt{padding:13px 16px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--bg3);cursor:pointer;transition:all .15s;margin-bottom:10px}
+.wiz-opt.sel{border-color:var(--purple);background:var(--purpleDim)}
+.wiz-opt-title{font-size:13px;font-weight:500}
+.wiz-opt-sub{font-size:12px;color:var(--t3);margin-top:3px}
+
+/* EDITABLE LIST */
+.ed-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1)}
+.ed-row:last-child{border-bottom:none}
+
+/* TOASTS */
+.toast-wrap{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:999}
+.toast{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r2);padding:11px 16px;font-size:13px;color:var(--t1);animation:slideUp .2s ease;min-width:180px;max-width:280px;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.toast.success{border-color:var(--green);color:var(--green2)}
+.toast.error{border-color:var(--red);color:var(--red2)}
+.toast.info{border-color:var(--purple);color:var(--purple3)}
+
+/* UTILS */
+.flex{display:flex}.fc{display:flex;flex-direction:column}.ic{align-items:center}.is{align-items:flex-start}
+.jb{justify-content:space-between}.jc{justify-content:center}
+.wrap{flex-wrap:wrap}
+.g4u{gap:4px}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mb4{margin-bottom:4px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}
+.w100{width:100%}.tc{text-align:center}
+.mono{font-family:var(--font-mono)}
+.c1{color:var(--t1)}.c2{color:var(--t2)}.c3{color:var(--t3)}.c4{color:var(--t4)}
+.cg{color:var(--green2)}.cp{color:var(--purple2)}.cb{color:var(--blue2)}.ca{color:var(--amber2)}.cr{color:var(--red2)}
+.f10{font-size:10px}.f11{font-size:11px}.f12{font-size:12px}.f13{font-size:13px}.f14{font-size:14px}.f16{font-size:16px}
+.w5{font-weight:500}.w6{font-weight:600}
+.div{height:1px;background:var(--b1);margin:16px 0}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptr{cursor:pointer}
+
+/* ANIMATIONS */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .blk-desc{display:none}
+}
+@media(max-width:680px){
+  .mobile-bar{display:flex}
+  .overlay{display:block}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:260px;transform:translateX(-100%);box-shadow:4px 0 24px rgba(0,0,0,.5)}
+  .sidebar.open{transform:translateX(0)}
+  .page{padding:16px 14px}
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr}
+  .g4{grid-template-columns:repeat(2,1fr);gap:10px}
+  .ph{flex-direction:column;align-items:flex-start;margin-bottom:18px}
+  .pha{width:100%}
+  .sv{font-size:20px}
+  .focus-time{font-size:48px}
+  .blk-time{font-size:10px;min-width:60px;max-width:60px;padding:8px}
+  .blk-acts{min-width:80px;padding:8px}
+  .tmono{font-size:12px}
+  .modal-bg{padding:20px 12px;align-items:flex-end}
+  .modal{border-radius:var(--r3) var(--r3) 0 0;width:100%;max-width:100%}
+  .toast-wrap{bottom:12px;right:12px;left:12px}
+  .toast{max-width:100%}
+  .wiz-card{padding:24px 18px}
+}
+@media(max-width:360px){
+  .page{padding:12px 10px}
+  .card{padding:14px 12px}
+  .sv{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const SK='lifeOS_v2';
+const VER='2.0.0';
+
+const DEFAULT_DIMS={
+  spiritual:{label:'Spiritual',color:'#8b6fd4',emoji:'🙏'},
+  physical:{label:'Physical',color:'#28c97a',emoji:'💪'},
+  technical:{label:'Technical',color:'#3d82e8',emoji:'💻'},
+  trading:{label:'Trading',color:'#e8a020',emoji:'📈'},
+  creative:{label:'Creative',color:'#e060a8',emoji:'🎨'},
+  intellectual:{label:'Intellectual',color:'#20c9c0',emoji:'📚'},
+  emotional:{label:'Emotional',color:'#62a0ff',emoji:'🤝'},
+  rest:{label:'Rest',color:'#5a6280',emoji:'🌙'},
+  work:{label:'Work',color:'#e84040',emoji:'🏢'},
+  admin:{label:'Admin',color:'#7a7a8a',emoji:'⚙️'},
+};
+
+const DEFAULT_SCHEDULE=[
+  {id:'s1',time:'05:00',end:'05:45',title:'Morning Ritual',dim:'spiritual',color:'#8b6fd4',detail:'Prayer · 10 min meditation · Journal 3 lines · No phone until complete.'},
+  {id:'s2',time:'05:45',end:'06:15',title:'Body Activation',dim:'physical',color:'#28c97a',detail:'Training day: calisthenics push/pull/legs. Cardio day: 25 min run or jump rope.'},
+  {id:'s3',time:'06:15',end:'07:00',title:'Shower, Dress & Fuel',dim:'admin',color:'#7a7a8a',detail:'Cold shower · dress intentionally · real breakfast · workspace prepared.'},
+  {id:'s4',time:'07:00',end:'10:00',title:'Deep Work — Cybersecurity',dim:'technical',color:'#3d82e8',detail:'Security+ / CEH labs · TryHackMe / HackTheBox · 50/10 Pomodoro blocks.'},
+  {id:'s5',time:'10:00',end:'13:00',title:'Attachment',dim:'work',color:'#e84040',detail:'Show up fully · contribute actively · document real-world experience.'},
+  {id:'s6',time:'13:00',end:'15:00',title:'Trading Session',dim:'trading',color:'#e8a020',detail:'Pre-analysis 15 min → execute system → post-debrief 15 min.'},
+  {id:'s7',time:'15:00',end:'16:30',title:'Physical Training',dim:'physical',color:'#28c97a',detail:'Mon/Wed/Fri: calisthenics. Tue/Thu: cardio + recovery. Always stretch.'},
+  {id:'s8',time:'16:30',end:'18:00',title:'Creative Soul Time',dim:'creative',color:'#e060a8',detail:'Music · photography · cooking · fashion. Rotate weekly. Non-negotiable.'},
+  {id:'s9',time:'18:00',end:'21:00',title:'Night Work — Build / Blog',dim:'technical',color:'#3d82e8',detail:'Mon/Wed/Fri: blog writing. Tue/Thu: project build. One task, full output.'},
+  {id:'s10',time:'21:00',end:'22:30',title:'Wind-Down Ritual',dim:'rest',color:'#5a6280',detail:"Review journal · tomorrow's 3 priorities · 30 min reading · sleep by 22:30."},
+];
+
+const DEFAULT_APPS=[
+  {id:'a1',name:'Gmail',desc:'Email client',emoji:'✉️',url:'https://mail.google.com',color:'#e84040'},
+  {id:'a2',name:'Notion',desc:'Notes & workspace',emoji:'📋',url:'https://notion.so',color:'#888'},
+  {id:'a3',name:'Trade Log',desc:'Trading journal',emoji:'📊',url:'',launchKey:'tradelog',color:'#e8a020'},
+  {id:'a4',name:'Apex Workout',desc:'Training tracker',emoji:'💪',url:'',color:'#28c97a'},
+  {id:'a5',name:'TryHackMe',desc:'Cybersec labs',emoji:'🔐',url:'https://tryhackme.com',color:'#3d82e8'},
+  {id:'a6',name:'Forex Factory',desc:'Economic calendar',emoji:'📅',url:'https://forexfactory.com',color:'#e8a020'},
+  {id:'a7',name:'TradingView',desc:'Charts & analysis',emoji:'📈',url:'https://tradingview.com',color:'#8b6fd4'},
+  {id:'a8',name:'GitHub',desc:'Code & portfolio',emoji:'🐙',url:'https://github.com',color:'#6e40c9'},
+  {id:'a9',name:'HackTheBox',desc:'Pentesting labs',emoji:'🖥️',url:'https://hackthebox.com',color:'#3d82e8'},
+  {id:'a10',name:'Investing.com',desc:'Market data',emoji:'💹',url:'https://investing.com',color:'#28c97a'},
+];
+
+const DEFAULT_STATE={
+  _v:VER,firstRun:true,pin:'1234',isUnlocked:false,
+  profile:{name:'Your Name',initials:'YT',goal:'Cybersecurity Employment · 6 months',bio:'Trader · Cybersecurity Student · Builder',joinDate:new Date().toISOString().slice(0,10),streak:7},
+  dimensions:{...DEFAULT_DIMS},
+  schedule:[...DEFAULT_SCHEDULE],
+  apps:[...DEFAULT_APPS],
+  goals:{
+    weekly:[
+      {id:'wg1',text:'Complete CEH Chapter 4 + build a lab',dim:'technical',done:false,progress:60},
+      {id:'wg2',text:'Log and debrief 5 trading sessions',dim:'trading',done:false,progress:60},
+      {id:'wg3',text:'Train 5x — hit every physical block',dim:'physical',done:false,progress:80},
+      {id:'wg4',text:'Publish blog post on nmap fundamentals',dim:'technical',done:false,progress:30},
+      {id:'wg5',text:'Morning ritual 7/7 days',dim:'spiritual',done:false,progress:71},
+    ],
+    monthly:[
+      {id:'mg1',text:'Complete CompTIA Security+ Module 1',dim:'technical',done:false,progress:45},
+      {id:'mg2',text:'Send 2 cybersecurity job applications',dim:'technical',done:false,progress:0},
+      {id:'mg3',text:'Achieve 60%+ win rate in trading',dim:'trading',done:false,progress:52},
+      {id:'mg4',text:'30-day unbroken morning ritual streak',dim:'spiritual',done:false,progress:23},
+      {id:'mg5',text:'Build and deploy one web project',dim:'technical',done:false,progress:15},
+    ],
+  },
+  checklists:{
+    morning:[
+      {id:'m1',text:'Wake up — no phone for first 30 minutes'},
+      {id:'m2',text:'5 min prayer or quiet gratitude'},
+      {id:'m3',text:'10 min meditation — observe, do not chase thoughts'},
+      {id:'m4',text:'Journal: gratitude + intention + one boundary'},
+      {id:'m5',text:'Body activation — training or cardio'},
+      {id:'m6',text:'Cold shower · dress intentionally'},
+      {id:'m7',text:'Real breakfast · workspace prepared'},
+    ],
+    trading:[
+      {id:'t1',text:'Economic calendar checked for high-impact news'},
+      {id:'t2',text:'Top-down analysis complete (W1 → D1 → H4 → M15)'},
+      {id:'t3',text:'Fundamental bias confirmed and written down'},
+      {id:'t4',text:'Pre-planned setups identified before session opens'},
+      {id:'t5',text:'Risk parameters confirmed — max 1-2% per trade'},
+      {id:'t6',text:'No high-impact news within 15 min of entry'},
+      {id:'t7',text:'All 9 completion checklist boxes ticked per trade'},
+    ],
+    evening:[
+      {id:'e1',text:'Post-session debrief written in trade journal'},
+      {id:'e2',text:"Reviewed today's morning journal intention"},
+      {id:'e3',text:"Tomorrow's 3 priorities written down"},
+      {id:'e4',text:'30 min reading — alternate fiction / non-fiction'},
+      {id:'e5',text:'No screens after 21:30'},
+      {id:'e6',text:"Workspace prepared and tomorrow's alarm set"},
+    ],
+    vices:[
+      {id:'v1',text:'No smoking during any work or study block'},
+      {id:'v2',text:'No alcohol (weekday) · max 1 drink Saturday evening'},
+      {id:'v3',text:'No distraction apps during deep work hours'},
+      {id:'v4',text:'Phone in another room during all study sessions'},
+      {id:'v5',text:'Every work block produced at least one concrete output'},
+    ],
+  },
+  customChecklists:[],
+  checklistDate:'',
+  checklistState:{morning:{},trading:{},evening:{},vices:{}},
+  customChecklistState:{},
+  notes:[
+    {id:'n1',title:'COT analysis — USD bullish bias',body:'Big speculators are net long on DXY this week. Align only with bullish USD setups. Avoid counter-trend on EUR/USD and GBP/USD until COT shifts.',dim:'trading',session:'Trading Session',date:'2025-03-10',tags:['trading','fundamentals'],pinned:false},
+    {id:'n2',title:'nmap port scanning — key flags',body:'Completed nmap module.\n\n-sV = version detection\n-O = OS detection\n-p- = all 65535 ports\n-sS = stealth SYN scan\n-A = aggressive: OS + version + scripts\n\nAlways run -p- first, then -sV on open ports only.',dim:'technical',session:'Deep Work — Cybersecurity',date:'2025-03-11',tags:['cybersec','lab','nmap'],pinned:true},
+    {id:'n3',title:'Morning reflection — momentum week',body:"Grateful for three consecutive mornings of full ritual. Intention: do not react to market noise, stay patient, trust the zones.",dim:'spiritual',session:'Morning Ritual',date:'2025-03-12',tags:['spiritual','journal'],pinned:false},
+  ],
+  reminders:[
+    {id:'r1',label:'Morning ritual',time:'05:00',on:true,days:['M','T','W','Th','F','Sa','Su']},
+    {id:'r2',label:'Trading pre-session analysis',time:'12:45',on:true,days:['M','T','W','Th','F']},
+    {id:'r3',label:'Evening wind-down',time:'21:00',on:true,days:['M','T','W','Th','F','Sa','Su']},
+    {id:'r4',label:'Weekly trading review',time:'11:00',on:true,days:['Sa']},
+    {id:'r5',label:'Sunday life review',time:'08:30',on:true,days:['Su']},
+  ],
+  dailyLogs:{},
+};
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+function loadState(){
+  try{
+    const raw=localStorage.getItem(SK);
+    if(!raw)return{...DEFAULT_STATE};
+    const saved=JSON.parse(raw);
+    const merged=deepMerge(DEFAULT_STATE,saved);
+    merged.isUnlocked=false;
+    return merged;
+  }catch{return{...DEFAULT_STATE};}
+}
+function saveState(s){
+  try{const{isUnlocked,...t}=s;localStorage.setItem(SK,JSON.stringify(t));}catch(e){console.warn(e);}
+}
+function clearState(){localStorage.removeItem(SK);}
+function deepMerge(d,s){
+  const r={...d};
+  for(const k of Object.keys(s)){
+    if(k in d&&typeof d[k]==='object'&&d[k]!==null&&!Array.isArray(d[k])&&typeof s[k]==='object'&&s[k]!==null&&!Array.isArray(s[k])){
+      r[k]=deepMerge(d[k],s[k]);
+    }else{r[k]=s[k];}
+  }
+  return r;
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const pad2=n=>String(n).padStart(2,'0');
+const fmtSecs=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return h>0?`${pad2(h)}:${pad2(m)}:${pad2(sc)}`:`${pad2(m)}:${pad2(sc)}`;};
+const timeToMin=t=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m;};
+const nowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes();};
+const greet=()=>{const h=new Date().getHours();return h<12?'Morning':h<17?'Afternoon':'Evening';};
+const todayLbl=()=>new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const dimColor=(dims,key)=>(dims&&dims[key]?.color)||DEFAULT_DIMS[key]?.color||'#5a6280';
+
+function computeStats(state){
+  const{dailyLogs,goals,checklists,checklistState,schedule,dimensions,customChecklists,customChecklistState}=state;
+  const today=todayKey();
+  const todayLog=dailyLogs[today]||{completedBlocks:[],sessionLogs:[]};
+  const todaySecs=todayLog.sessionLogs.reduce((a,b)=>a+(b.durationSecs||0),0);
+  const active14=Array.from({length:14},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-(13-i));
+    return(dailyLogs[d.toISOString().slice(0,10)]?.sessionLogs||[]).length>0;
+  }).filter(Boolean).length;
+  const consistency=Math.round((active14/14)*100);
+  const days7=Array.from({length:7},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-(6-i));
+    return(dailyLogs[d.toISOString().slice(0,10)]?.sessionLogs||[]).length;
+  });
+  const dimSecs={};
+  for(let i=0;i<7;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const log=dailyLogs[d.toISOString().slice(0,10)];
+    if(!log)continue;
+    log.sessionLogs.forEach(s=>{
+      const blk=schedule.find(b=>b.id===s.blockId||b.title===s.title);
+      if(blk)dimSecs[blk.dim]=(dimSecs[blk.dim]||0)+(s.durationSecs||0);
+    });
+  }
+  const maxS=Math.max(...Object.values(dimSecs),1);
+  const allDims={...DEFAULT_DIMS,...dimensions};
+  const dimScores={};
+  Object.keys(allDims).forEach(k=>{dimScores[k]=dimSecs[k]?Math.round((dimSecs[k]/maxS)*100):0;});
+  const heatmap=Array.from({length:35},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-(34-i));
+    const log=dailyLogs[d.toISOString().slice(0,10)];
+    if(!log)return 0;
+    return Math.min(3,Math.floor(log.sessionLogs.length/2));
+  });
+  const totalItems=Object.values(checklists).flat().length+(customChecklists||[]).reduce((a,b)=>a+b.items.length,0);
+  const doneItems=Object.values(checklistState).flatMap(o=>Object.values(o)).filter(Boolean).length
+    +Object.values(customChecklistState||{}).flatMap(o=>Object.values(o)).filter(Boolean).length;
+  return{
+    consistency,days7,dimScores,heatmap,
+    todaySessionCount:todayLog.sessionLogs.length,
+    todaySecs,todayLog,
+    weeklyDone:goals.weekly.filter(g=>g.done).length,weeklyTotal:goals.weekly.length,
+    monthlyDone:goals.monthly.filter(g=>g.done).length,monthlyTotal:goals.monthly.length,
+    checkDone:doneItems,checkTotal:totalItems,
+  };
+}
+
+// ─── ICONS ────────────────────────────────────────────────────────────────────
+const IC={
+  grid:<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><rect x="1" y="1" width="5.5" height="5.5" rx="1"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1"/></svg>,
+  cal:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="2.5" width="13" height="11" rx="1.5"/><path d="M4.5 1v3M10.5 1v3M1 6.5h13"/></svg>,
+  chk:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="1" width="13" height="13" rx="2"/><polyline points="4,7.5 6.5,10 11,5"/></svg>,
+  note:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="2" y="1" width="11" height="13" rx="1.5"/><line x1="4.5" y1="5" x2="10.5" y2="5"/><line x1="4.5" y1="7.5" x2="10.5" y2="7.5"/><line x1="4.5" y1="10" x2="8" y2="10"/></svg>,
+  bar:<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><rect x="1" y="8" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="9" rx="1"/><rect x="11" y="2" width="3" height="12" rx="1"/></svg>,
+  bell:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M7.5 2a4.5 4.5 0 0 1 4.5 4.5v2.5l1 2H2l1-2V6.5A4.5 4.5 0 0 1 7.5 2z"/><path d="M5.5 13.5a2 2 0 0 0 4 0"/></svg>,
+  apps:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="9" y="1" width="5" height="5" rx="1"/><rect x="1" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>,
+  user:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><circle cx="7.5" cy="5" r="3"/><path d="M2 14c0-3 2.5-5.5 5.5-5.5S13 11 13 14"/></svg>,
+  focus:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><circle cx="7.5" cy="7.5" r="6"/><circle cx="7.5" cy="7.5" r="2"/><line x1="7.5" y1="1.5" x2="7.5" y2="3.5"/><line x1="7.5" y1="11.5" x2="7.5" y2="13.5"/><line x1="1.5" y1="7.5" x2="3.5" y2="7.5"/><line x1="11.5" y1="7.5" x2="13.5" y2="7.5"/></svg>,
+  target:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><polyline points="1,9 5,5 9,8 15,2"/><polyline points="11,2 15,2 15,6"/></svg>,
+  fire:<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><path d="M7.5 1C7.5 4.5 3.5 6 3.5 9.5a4 4 0 0 0 8 0C11.5 6 7.5 4.5 7.5 1z" opacity=".85"/></svg>,
+  play:<svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M2.5 1.5l7 4-7 4z"/></svg>,
+  stop:<svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="2" y="2" width="7" height="7" rx="1"/></svg>,
+  plus:<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6"><line x1="6.5" y1="1" x2="6.5" y2="12"/><line x1="1" y1="6.5" x2="12" y2="6.5"/></svg>,
+  trash:<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.3"><polyline points="1,3 12,3"/><path d="M5 3V2h3v1"/><rect x="2" y="3" width="9" height="9" rx="1"/><line x1="5" y1="6" x2="5" y2="9"/><line x1="8" y1="6" x2="8" y2="9"/></svg>,
+  edit:<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M9 2l2 2L4 11H2V9L9 2z"/></svg>,
+  link:<svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M4.5 6a2.5 2.5 0 0 0 3.5 0l1.5-1.5a2.5 2.5 0 0 0-3.5-3.5L4.5 2.5"/><path d="M6.5 5a2.5 2.5 0 0 0-3.5 0L1.5 6.5a2.5 2.5 0 0 0 3.5 3.5L6.5 8.5"/></svg>,
+  pin:<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M5 1l1 4-3.5 3.5M7 1l-1 4 3.5 3.5M3 9l6-6M1 11l3-3"/></svg>,
+  close:<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>,
+  dl:<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M6.5 1v8M3.5 6l3 3 3-3"/><path d="M1 11h11"/></svg>,
+  ul:<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M6.5 9V1M3.5 4l3-3 3 3"/><path d="M1 11h11"/></svg>,
+  ok:<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7 8,3" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  menu:<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="5" x2="16" y2="5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13" x2="16" y2="13"/></svg>,
+  ws:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="1" width="13" height="13" rx="2"/><line x1="1" y1="5" x2="14" y2="5"/><line x1="5" y1="5" x2="5" y2="14"/></svg>,
+};
+
+// ─── TOAST HOOK ───────────────────────────────────────────────────────────────
+function useToast(){
+  const[toasts,setToasts]=useState([]);
+  const toast=useCallback((msg,type='info')=>{
+    const id=uid();
+    setToasts(t=>[...t,{id,msg,type}]);
+    setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3000);
+  },[]);
+  return{toasts,toast};
+}
+
+// ─── SHARED COMPONENTS ────────────────────────────────────────────────────────
+function Toasts({toasts}){
+  return <div className="toast-wrap">{toasts.map(t=><div key={t.id} className={`toast ${t.type}`}>{t.msg}</div>)}</div>;
+}
+
+function DimDot({dim,dims,size=7}){
+  return <span className="ddot" style={{background:dimColor(dims,dim),width:size,height:size}}/>;
+}
+
+function ProgBar({value,color,label,showPct=true}){
+  const v=Math.round(Math.max(0,Math.min(100,value)));
+  return(
+    <div className="pw">
+      {label&&<div className="pl"><span>{label}</span>{showPct&&<span style={{color,fontFamily:'var(--font-mono)',fontSize:11}}>{v}%</span>}</div>}
+      <div className="pt2"><div className="pf" style={{width:`${v}%`,background:color||'var(--purple)'}}/></div>
+    </div>
+  );
+}
+
+function Modal({title,onClose,children,wide}){
+  useEffect(()=>{
+    const h=e=>{if(e.key==='Escape')onClose();};
+    window.addEventListener('keydown',h);
+    return()=>window.removeEventListener('keydown',h);
+  },[onClose]);
+  return(
+    <div className="modal-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={wide?{width:680}:{}}>
+        <div className="flex ic jb mb16">
+          <div className="modal-title">{title}</div>
+          <button className="btn btn-g btn-sm btn-ic" onClick={onClose}>{IC.close}</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Toggle({on,onChange}){
+  return <div className={`toggle${on?' on':''}`} onClick={()=>onChange(!on)}/>;
+}
+
+function ChkRow({text,done,onChange,accent}){
+  return(
+    <div className="chk-row" onClick={onChange}>
+      <div className={`chk-box${done?' done':''}`} style={done&&accent?{background:accent,borderColor:accent}:{}}>
+        {done&&IC.ok}
+      </div>
+      <span className={`chk-lbl${done?' done':''}`}>{text}</span>
+    </div>
+  );
+}
+
+function DimSel({value,onChange,dims}){
+  const all={...DEFAULT_DIMS,...(dims||{})};
+  return(
+    <select value={value} onChange={e=>onChange(e.target.value)}>
+      {Object.entries(all).map(([k,d])=><option key={k} value={k}>{d.emoji} {d.label}</option>)}
+    </select>
+  );
+}
+
+function ColPick({value,onChange}){
+  return(
+    <input type="color" value={value} onChange={e=>onChange(e.target.value)}
+      style={{width:28,height:28,padding:2,cursor:'pointer',background:'transparent',border:'1px solid var(--b2)',borderRadius:'50%'}}/>
+  );
+}
+
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
+function Onboarding({onComplete}){
+  const[step,setStep]=useState(0);
+  const[d,setD]=useState({name:'',initials:'',goal:'',bio:'',pin:'1234',defSched:true,defGoals:true});
+  const set=(k,v)=>setD(x=>({...x,[k]:v}));
+  const autoInits=name=>{const p=name.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():name.slice(0,2).toUpperCase();};
+  const finish=()=>onComplete({...d,name:d.name||'Your Name',initials:d.initials||(d.name?autoInits(d.name):'YT'),goal:d.goal||'My Primary Goal',bio:d.bio||'Building the life I admire.',pin:d.pin||'1234'});
+  const next=()=>step<3?setStep(s=>s+1):finish();
+  const steps=[
+    <>
+      <div className="wiz-step">Step 1 of 4</div>
+      <div className="wiz-title">Welcome to Life OS</div>
+      <div className="wiz-sub">Your personal operating system. Set it up in 4 steps — everything is customisable inside the app.</div>
+      <div className="fr"><label className="fl">Your full name</label><input autoFocus value={d.name} onChange={e=>{set('name',e.target.value);set('initials',autoInits(e.target.value));}} placeholder="e.g. James Kariuki" onKeyDown={e=>e.key==='Enter'&&next()}/></div>
+      <div className="fr"><label className="fl">Avatar initials</label><input value={d.initials} onChange={e=>set('initials',e.target.value.toUpperCase().slice(0,2))} style={{width:80}} maxLength={2} placeholder="JK"/></div>
+      <div className="fr"><label className="fl">Primary mission</label><input value={d.goal} onChange={e=>set('goal',e.target.value)} placeholder="e.g. Cybersecurity Employment · 6 months" onKeyDown={e=>e.key==='Enter'&&next()}/></div>
+    </>,
+    <>
+      <div className="wiz-step">Step 2 of 4</div>
+      <div className="wiz-title">Identity & security</div>
+      <div className="wiz-sub">Set your bio and choose a 4-digit PIN. The PIN locks the app every time you close it.</div>
+      <div className="fr"><label className="fl">Short bio</label><input value={d.bio} onChange={e=>set('bio',e.target.value)} placeholder="Trader · Cybersecurity Student · Builder" onKeyDown={e=>e.key==='Enter'&&next()}/></div>
+      <div className="fr"><label className="fl">4-digit PIN (default: 1234)</label><input type="password" maxLength={4} value={d.pin} onChange={e=>set('pin',e.target.value.replace(/\D/g,'').slice(0,4))} placeholder="• • • •" style={{width:120,fontFamily:'var(--font-mono)',letterSpacing:'.3em'}}/></div>
+    </>,
+    <>
+      <div className="wiz-step">Step 3 of 4</div>
+      <div className="wiz-title">Daily schedule</div>
+      <div className="wiz-sub">Life OS ships with a pre-built schedule. Keep it or start blank — you can edit every block later.</div>
+      {[{val:true,label:'Use pre-built schedule',sub:'10 blocks from 05:00 to 22:30 — morning ritual through wind-down'},{val:false,label:'Start blank',sub:'I will build my own schedule from scratch'}].map(o=>(
+        <div key={String(o.val)} className={`wiz-opt${d.defSched===o.val?' sel':''}`} onClick={()=>set('defSched',o.val)}>
+          <div className={`wiz-opt-title${d.defSched===o.val?' cp':''}`}>{o.label}</div>
+          <div className="wiz-opt-sub">{o.sub}</div>
+        </div>
+      ))}
+    </>,
+    <>
+      <div className="wiz-step">Step 4 of 4</div>
+      <div className="wiz-title">Ready to launch</div>
+      <div className="wiz-sub">Start with sample goals and notes, or go completely clean. You can change everything from inside the app.</div>
+      {[{val:true,label:'Load sample goals & notes',sub:'See the app in action before customising'},{val:false,label:'Start completely fresh',sub:'Blank goals, no notes — pure clean slate'}].map(o=>(
+        <div key={String(o.val)} className={`wiz-opt${d.defGoals===o.val?' sel':''}`} onClick={()=>set('defGoals',o.val)}>
+          <div className={`wiz-opt-title${d.defGoals===o.val?' cp':''}`}>{o.label}</div>
+          <div className="wiz-opt-sub">{o.sub}</div>
+        </div>
+      ))}
+    </>,
+  ];
+  return(
+    <div className="wizard">
+      <div className="wiz-card">
+        {steps[step]}
+        <div className="flex ic jb mt20">
+          <button className="btn btn-g" onClick={()=>setStep(s=>s-1)} style={{visibility:step===0?'hidden':'visible'}}>← Back</button>
+          <div className="wiz-dots">{Array.from({length:4}).map((_,i)=><div key={i} className={`wiz-dot${i<=step?' active':''}`}/>)}</div>
+          <button className="btn btn-p" onClick={next}>{step===3?'Launch →':'Continue →'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PIN LOCK ─────────────────────────────────────────────────────────────────
+function PinLock({onUnlock,storedPin}){
+  const[input,setInput]=useState('');
+  const[err,setErr]=useState('');
+  const[shake,setShake]=useState(false);
+  const handleKey=useCallback(k=>{
+    if(shake)return;
+    if(k==='DEL'){setInput(p=>p.slice(0,-1));setErr('');return;}
+    if(input.length>=4)return;
+    const next=input+k;
+    setInput(next);
+    if(next.length===4){
+      if(next===storedPin){onUnlock();}
+      else{setErr('Incorrect PIN');setShake(true);setTimeout(()=>{setInput('');setErr('');setShake(false);},700);}
+    }
+  },[input,shake,storedPin,onUnlock]);
+  useEffect(()=>{
+    const h=e=>{if(e.key>='0'&&e.key<='9')handleKey(e.key);else if(e.key==='Backspace')handleKey('DEL');};
+    window.addEventListener('keydown',h);
+    return()=>window.removeEventListener('keydown',h);
+  },[handleKey]);
+  const keys=['1','2','3','4','5','6','7','8','9','','0','DEL'];
+  return(
+    <div className="lock-screen">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="var(--purple2)" strokeWidth="2.2">
+        <rect x="6" y="20" width="32" height="22" rx="5"/>
+        <path d="M14 20v-7a8 8 0 0 1 16 0v7"/>
+        <circle cx="22" cy="31" r="3" fill="var(--purple2)"/>
+      </svg>
+      <div className="lock-title">Life OS</div>
+      <div className="lock-sub">Enter your PIN</div>
+      <div className="pin-dots" style={shake?{animation:'shake .3s ease'}:{}}>{[0,1,2,3].map(i=><div key={i} className={`pin-dot${i<input.length?' filled':''}`}/>)}</div>
+      {err&&<div className="pin-err">{err}</div>}
+      <div className="pin-grid">
+        {keys.map((k,i)=>(
+          <div key={i} style={{visibility:k===''?'hidden':'visible'}} className="pin-key" onClick={()=>k&&handleKey(k)}>{k==='DEL'?'⌫':k}</div>
+        ))}
+      </div>
+      <div className="c3 f11 mt8" style={{letterSpacing:'.04em'}}>Type on keyboard or tap above</div>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+const NAV=[
+  {s:'Core'},{id:'dashboard',label:'Dashboard',icon:'grid'},
+  {id:'schedule',label:'Schedule',icon:'cal'},
+  {id:'focus',label:'Focus Mode',icon:'focus'},
+  {s:'Planning'},{id:'goals',label:'Goals',icon:'target'},
+  {id:'checklist',label:'Checklists',icon:'chk'},
+  {id:'notes',label:'Notes',icon:'note'},
+  {s:'Insights'},{id:'stats',label:'Statistics',icon:'bar'},
+  {id:'reminders',label:'Reminders',icon:'bell'},
+  {id:'apps',label:'Apps',icon:'apps'},
+  {s:'Account'},{id:'workspace',label:'Workspace',icon:'ws'},
+  {id:'profile',label:'Profile & Security',icon:'user'},
+];
+
+function Sidebar({page,setPage,state,checkRem,open,onClose}){
+  const{profile}=state;
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return(
+    <aside className={`sidebar${open?' open':''}`}>
+      <div className="sidebar-logo">
+        <div className="logo-wm">LIFE<span> OS</span></div>
+        <div className="logo-tag">Your blueprint · Active</div>
+      </div>
+      <div className="sidebar-profile" onClick={()=>{setPage('profile');onClose();}}>
+        <div className="avatar">{profile.initials||'?'}</div>
+        <div>
+          <div className="pname">{profile.name}</div>
+          <div className="prole">{profile.goal}</div>
+        </div>
+      </div>
+      <nav className="nav">
+        {NAV.map((item,i)=>{
+          if(item.s)return <div key={i} className="nav-sect">{item.s}</div>;
+          const badge=item.id==='checklist'&&checkRem>0?checkRem:null;
+          return(
+            <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={()=>{setPage(item.id);onClose();}}>
+              <span className="nav-icon">{IC[item.icon]}</span>
+              {item.label}
+              {badge&&<span className="nav-badge">{badge}</span>}
+            </div>
+          );
+        })}
+      </nav>
+      <div className="sidebar-bottom">
+        <div className="streak-wrap">
+          <span style={{color:'var(--amber2)'}}>{IC.fire}</span>
+          <div><div className="streak-num">{profile.streak??0}</div><div className="streak-lbl">day streak</div></div>
+          <div className="streak-date">{today}</div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function Dashboard({state,setState,setPage,toast}){
+  const{profile,goals,notes,checklists,checklistState,schedule,dimensions}=state;
+  const nm=nowMin();
+  const stats=useMemo(()=>computeStats(state),[state]);
+  const allDims={...DEFAULT_DIMS,...dimensions};
+  const curBlk=schedule.find(b=>nm>=timeToMin(b.time)&&nm<timeToMin(b.end));
+  const nxtBlk=schedule.find(b=>timeToMin(b.time)>nm);
+  const morDone=Object.values(checklistState.morning||{}).filter(Boolean).length;
+  const morTot=checklists.morning.length;
+  return(
+    <div className="page">
+      <div className="ph">
+        <div><div className="pt">Good {greet()}, {profile.name.split(' ')[0]}</div><div className="ps">{todayLbl()} · Consistency: <span className="cg">{stats.consistency}%</span></div></div>
+        <div className="pha">
+          <button className="btn btn-g btn-sm" onClick={()=>setPage('focus')}>Focus Mode</button>
+          <button className="btn btn-p btn-sm" onClick={()=>setPage('schedule')}>Schedule</button>
+        </div>
+      </div>
+      {curBlk?(
+        <div className="card mb16" style={{borderColor:'var(--green)',borderLeft:'3px solid var(--green)'}}>
+          <div className="flex jb ic wrap g12">
+            <div><div className="f10 c3 mb4" style={{letterSpacing:'.08em',textTransform:'uppercase'}}>Active right now</div><div className="w6" style={{fontSize:15}}>{curBlk.title}</div><div className="f12 c3 mt4">{curBlk.time}–{curBlk.end}</div></div>
+            <div className="flex g8 ic"><span className="tag tg"><span className="ldot" style={{marginRight:4}}/>NOW</span><button className="btn btn-gr btn-sm" onClick={()=>setPage('schedule')}>Start Timer</button></div>
+          </div>
+        </div>
+      ):(
+        <div className="card mb16 card-sm" style={{borderLeft:'3px solid var(--b3)'}}>
+          <div className="f13 c3">No active block right now{nxtBlk&&<> · Next: <span className="w5 c1">{nxtBlk.title}</span> at {nxtBlk.time}</>}</div>
+        </div>
+      )}
+      <div className="g4 mb16">
+        <div className="stat-card"><div className="sv cp">{profile.streak??0}</div><div className="sl">Day Streak</div></div>
+        <div className="stat-card"><div className="sv cg">{stats.consistency}%</div><div className="sl">Consistency</div></div>
+        <div className="stat-card"><div className="sv cb">{stats.todaySessionCount}</div><div className="sl">Sessions Today</div></div>
+        <div className="stat-card"><div className="sv ca">{morDone}/{morTot}</div><div className="sl">Morning Checks</div></div>
+      </div>
+      <div className="g2 mb16">
+        <div className="card">
+          <div className="card-title">7 Dimensions — This Week</div>
+          {Object.entries(allDims).map(([k,d])=>(
+            <div key={k} className="bar-row">
+              <div className="bar-lbl">{d.label}</div>
+              <div className="bar-track"><div className="bar-fill" style={{width:`${stats.dimScores[k]||0}%`,background:d.color}}/></div>
+              <div className="bar-pct">{stats.dimScores[k]||0}%</div>
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <div className="card-title">Weekly Goals</div>
+          {goals.weekly.length===0&&<div className="f13 c3">No weekly goals yet.</div>}
+          {goals.weekly.map(g=><ProgBar key={g.id} value={g.progress} color={dimColor(allDims,g.dim)} label={g.text.length>40?g.text.slice(0,40)+'…':g.text}/>)}
+          <button className="btn btn-g btn-sm mt12 w100" onClick={()=>setPage('goals')}>All Goals →</button>
+        </div>
+      </div>
+      <div className="g2">
+        <div className="card">
+          <div className="flex jb ic mb12">
+            <div className="card-title" style={{margin:0}}>Morning Checklist</div>
+            <span className={`tag ${morDone===morTot?'tg':'tp'}`}>{morDone}/{morTot}</span>
+          </div>
+          {checklists.morning.slice(0,4).map(c=>(
+            <ChkRow key={c.id} text={c.text} done={!!checklistState.morning?.[c.id]}
+              onChange={()=>setState(s=>({...s,checklistState:{...s.checklistState,morning:{...s.checklistState.morning,[c.id]:!s.checklistState.morning?.[c.id]}}}))}/>
+          ))}
+          <button className="btn btn-g btn-sm mt12 w100" onClick={()=>setPage('checklist')}>Full Checklists →</button>
+        </div>
+        <div className="card">
+          <div className="card-title">Recent Notes</div>
+          {notes.length===0&&<div className="f13 c3">No notes yet.</div>}
+          {notes.slice(0,3).map(n=>(
+            <div key={n.id} className="flex g8 ic mb10 ptr" onClick={()=>setPage('notes')}>
+              <DimDot dim={n.dim} dims={allDims}/>
+              <div style={{minWidth:0}}>
+                <div className="f13 w5 trunc">{n.title}</div>
+                <div className="f11 c3">{n.session?`${n.session} · `:''}{n.date}</div>
+              </div>
+            </div>
+          ))}
+          <button className="btn btn-g btn-sm mt4 w100" onClick={()=>setPage('notes')}>All Notes →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCHEDULE ─────────────────────────────────────────────────────────────────
+function Schedule({state,setState,toast}){
+  const[timers,setTimers]=useState({});
+  const[running,setRunning]=useState(null);
+  const[editBlk,setEditBlk]=useState(null);
+  const[showAdd,setShowAdd]=useState(false);
+  const timerRef=useRef(null);
+  const today=todayKey();
+  const nm=nowMin();
+  const log=state.dailyLogs[today]||{completedBlocks:[],sessionLogs:[]};
+  useEffect(()=>()=>clearInterval(timerRef.current),[]);
+  const startTimer=blkId=>{
+    if(running)endTimer(running,false);
+    setRunning(blkId);
+    clearInterval(timerRef.current);
+    timerRef.current=setInterval(()=>setTimers(t=>({...t,[blkId]:(t[blkId]||0)+1})),1000);
+    toast(`Timer started: ${state.schedule.find(b=>b.id===blkId)?.title}`,'success');
+  };
+  const endTimer=(blkId,doLog=true)=>{
+    clearInterval(timerRef.current);
+    setRunning(null);
+    if(doLog){
+      const elapsed=timers[blkId]||0;
+      const blk=state.schedule.find(b=>b.id===blkId);
+      const entry={id:uid(),blockId:blkId,title:blk?.title||blkId,start:new Date(Date.now()-elapsed*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),end:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),durationSecs:elapsed,duration:fmtSecs(elapsed)};
+      setState(s=>{const dl=s.dailyLogs[today]||{completedBlocks:[],sessionLogs:[]};return{...s,dailyLogs:{...s.dailyLogs,[today]:{completedBlocks:[...dl.completedBlocks,blkId],sessionLogs:[...dl.sessionLogs,entry]}}};});
+      toast(`Logged: ${fmtSecs(elapsed)}`,'success');
+    }
+  };
+  const saveBlk=blk=>{
+    setState(s=>{
+      const exists=s.schedule.find(b=>b.id===blk.id);
+      const arr=exists?s.schedule.map(b=>b.id===blk.id?blk:b):[...s.schedule,blk];
+      return{...s,schedule:arr.slice().sort((a,b)=>timeToMin(a.time)-timeToMin(b.time))};
+    });
+    setEditBlk(null);setShowAdd(false);toast('Block saved','success');
+  };
+  const delBlk=id=>{
+    if(!window.confirm('Remove this block?'))return;
+    setState(s=>({...s,schedule:s.schedule.filter(b=>b.id!==id)}));
+    toast('Block removed','info');
+  };
+  const allDims={...DEFAULT_DIMS,...state.dimensions};
+  return(
+    <div className="page">
+      <div className="ph">
+        <div><div className="pt">Today's Schedule</div><div className="ps">Start timers · log sessions · edit blocks</div></div>
+        <div className="pha">
+          <button className="btn btn-g btn-sm" onClick={()=>{setState(s=>({...s,dailyLogs:{...s.dailyLogs,[today]:{completedBlocks:[],sessionLogs:[]}}}));setTimers({});setRunning(null);toast('Day reset','info');}}>Reset Day</button>
+          <button className="btn btn-p btn-sm" onClick={()=>setShowAdd(true)}>{IC.plus} Add Block</button>
+        </div>
+      </div>
+      {log.sessionLogs.length>0&&(
+        <div className="card mb16 card-sm">
+          <div className="card-title" style={{marginBottom:8}}>Logged Today</div>
+          <div className="flex g8 wrap">{log.sessionLogs.map(s=><span key={s.id} className="tag tg mono">{s.title} · {s.duration}</span>)}</div>
+        </div>
+      )}
+      {state.schedule.map(b=>{
+        const isNow=nm>=timeToMin(b.time)&&nm<timeToMin(b.end);
+        const isDone=log.completedBlocks.includes(b.id);
+        const isRun=running===b.id;
+        const secs=timers[b.id]||0;
+        const col=allDims[b.dim]?.color||b.color||'#5a6280';
+        return(
+          <div key={b.id} className={`blk${isNow?' blk-now':''}${isDone&&!isNow?' blk-done':''}`}>
+            <div className="blk-time">{b.time}<br/>{b.end}</div>
+            <div className="blk-stripe" style={{background:col}}/>
+            <div className="blk-body">
+              <div className="blk-name">{b.title}{isNow&&<span className="tag tg" style={{fontSize:10}}><span className="ldot" style={{marginRight:3}}/>NOW</span>}{isDone&&!isRun&&<span className="tag td" style={{fontSize:10}}>DONE</span>}</div>
+              <div className="blk-desc">{b.detail}</div>
+            </div>
+            <div className="blk-acts">
+              {isRun?(
+                <>{<div className="tmono">{fmtSecs(secs)}</div>}<button className="btn btn-r btn-sm" onClick={()=>endTimer(b.id)}>{IC.stop} End</button></>
+              ):(
+                <>{<button className="btn btn-g btn-sm" onClick={()=>startTimer(b.id)} disabled={isDone}>{IC.play} {isDone?'Done':'Start'}</button>}<button className="btn btn-g btn-xs btn-ic" onClick={()=>setEditBlk({...b})}>{IC.edit}</button></>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      {state.schedule.length===0&&<div className="card tc" style={{padding:'40px 20px'}}><div className="c3 f13">No schedule blocks yet.</div><button className="btn btn-p mt12" onClick={()=>setShowAdd(true)}>{IC.plus} Add First Block</button></div>}
+      {(editBlk||showAdd)&&<BlkEditor blk={editBlk||{id:uid(),time:'08:00',end:'09:00',title:'',dim:'technical',color:'#3d82e8',detail:''}} dims={state.dimensions} onSave={saveBlk} onDel={editBlk?()=>{delBlk(editBlk.id);setEditBlk(null);}:null} onClose={()=>{setEditBlk(null);setShowAdd(false);}}/>}
+    </div>
+  );
+}
+
+function BlkEditor({blk,dims,onSave,onDel,onClose}){
+  const[f,setF]=useState({...blk});
+  const s=(k,v)=>setF(x=>({...x,[k]:v}));
+  const allDims={...DEFAULT_DIMS,...dims};
+  return(
+    <Modal title={onDel?'Edit Block':'Add Block'} onClose={onClose}>
+      <div className="g2 g10"><div className="fr"><label className="fl">Start</label><input type="time" value={f.time} onChange={e=>s('time',e.target.value)}/></div><div className="fr"><label className="fl">End</label><input type="time" value={f.end} onChange={e=>s('end',e.target.value)}/></div></div>
+      <div className="fr"><label className="fl">Title</label><input autoFocus value={f.title} onChange={e=>s('title',e.target.value)} placeholder="e.g. Deep Work — Cybersecurity"/></div>
+      <div className="fr"><label className="fl">Dimension</label><DimSel value={f.dim} onChange={v=>{s('dim',v);s('color',allDims[v]?.color||'#5a6280');}} dims={dims}/></div>
+      <div className="fr"><label className="fl">Description</label><textarea value={f.detail} onChange={e=>s('detail',e.target.value)} placeholder="What happens in this block…" style={{minHeight:70}}/></div>
+      <div className="flex g8 jb mt16">
+        <div className="flex g8"><button className="btn btn-p" onClick={()=>onSave(f)} disabled={!f.title.trim()}>Save Block</button><button className="btn btn-g" onClick={onClose}>Cancel</button></div>
+        {onDel&&<button className="btn btn-r btn-sm" onClick={onDel}>{IC.trash} Remove</button>}
+      </div>
+    </Modal>
+  );
+}
+
+// ─── FOCUS ────────────────────────────────────────────────────────────────────
+function Focus({state,setState,toast}){
+  const[secs,setSecs]=useState(25*60);
+  const[total,setTotal]=useState(25*60);
+  const[running,setRunning]=useState(false);
+  const[mode,setMode]=useState('work');
+  const[linkedId,setLinkedId]=useState(state.schedule[0]?.id||'');
+  const[noteText,setNoteText]=useState('');
+  const iRef=useRef(null);
+  useEffect(()=>()=>clearInterval(iRef.current),[]);
+  useEffect(()=>{
+    if(running){iRef.current=setInterval(()=>setSecs(s=>{if(s<=0){clearInterval(iRef.current);setRunning(false);toast('Session complete! 🎯','success');return 0;}return s-1;}),1000);}
+    else clearInterval(iRef.current);
+    return()=>clearInterval(iRef.current);
+  },[running]);
+  const setPreset=(m,s)=>{setMode(m);setSecs(s);setTotal(s);setRunning(false);};
+  const C=2*Math.PI*80;
+  const pct=Math.round((1-secs/total)*100);
+  const dash=C*(1-pct/100);
+  const blk=state.schedule.find(b=>b.id===linkedId);
+  const saveNote=()=>{
+    if(!noteText.trim())return;
+    setState(s=>({...s,notes:[{id:uid(),title:`Focus note — ${blk?.title||'Session'}`,body:noteText.trim(),dim:blk?.dim||'technical',session:blk?.title||'',date:todayKey(),tags:['focus'],pinned:false},...s.notes]}));
+    setNoteText('');toast('Note saved','success');
+  };
+  const todayLog=state.dailyLogs[todayKey()]||{sessionLogs:[]};
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Focus Mode</div><div className="ps">Deep work · timed · distraction-free</div></div></div>
+      <div className="g2 mb16">
+        <div className="card tc" style={{padding:'28px 20px'}}>
+          <div className="f10 c3 mb12" style={{letterSpacing:'.1em',textTransform:'uppercase'}}>{mode==='work'?'Focus Session':'Break'}{blk?` · ${blk.title}`:''}</div>
+          <div style={{position:'relative',display:'inline-block',marginBottom:20}}>
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="80" fill="none" stroke="var(--bg5)" strokeWidth="8"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke={mode==='work'?'var(--purple)':'var(--green)'} strokeWidth="8" strokeDasharray={C} strokeDashoffset={dash} strokeLinecap="round" style={{transform:'rotate(-90deg)',transformOrigin:'100px 100px',transition:'stroke-dashoffset .9s linear'}}/>
+              <text x="100" y="94" textAnchor="middle" fill="var(--t1)" fontFamily="var(--font-mono)" fontSize="36" fontWeight="700" dominantBaseline="middle">{fmtSecs(secs)}</text>
+              <text x="100" y="120" textAnchor="middle" fill="var(--t3)" fontSize="13">{pct}% done</text>
+            </svg>
+          </div>
+          <div className="flex g8 jc">
+            <button className={`btn ${running?'btn-r':'btn-p'}`} onClick={()=>setRunning(r=>!r)}>{running?<>{IC.stop} Pause</>:<>{IC.play} Start</>}</button>
+            <button className="btn btn-g" onClick={()=>{setRunning(false);setSecs(total);}}>Reset</button>
+          </div>
+          <div className="flex g6 mt12 jc wrap">
+            {[['25 min','work',1500],['50 min','work',3000],['10 min break','break',600],['5 min','break',300]].map(([l,m,s])=>(
+              <button key={l} className="btn btn-g btn-xs" onClick={()=>setPreset(m,s)} style={{borderColor:total===s?'var(--purple)':'',color:total===s?'var(--purple3)':''}}>{l}</button>
+            ))}
+          </div>
+        </div>
+        <div className="card fc g12">
+          <div><div className="card-title">Linked Session</div><select value={linkedId} onChange={e=>setLinkedId(e.target.value)}><option value="">— None —</option>{state.schedule.map(b=><option key={b.id} value={b.id}>{b.title}</option>)}</select></div>
+          <div className="div" style={{margin:'4px 0'}}/>
+          <div><div className="card-title">Quick Note</div><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Capture an insight from this session…" style={{minHeight:80}}/><button className="btn btn-p btn-sm mt8 w100" onClick={saveNote}>Save Note</button></div>
+          <div className="div" style={{margin:'4px 0'}}/>
+          <div><div className="card-title">Today's Sessions</div>{todayLog.sessionLogs.length===0?<div className="f12 c3">None logged yet.</div>:todayLog.sessionLogs.map(s=><div key={s.id} className="flex jb ic" style={{padding:'7px 0',borderBottom:'1px solid var(--b1)'}}><div className="f12 w5">{s.title}</div><span className="tag tg mono">{s.duration}</span></div>)}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GOALS ────────────────────────────────────────────────────────────────────
+function Goals({state,setState,toast}){
+  const[showModal,setShowModal]=useState(false);
+  const[form,setForm]=useState({text:'',dim:'technical',type:'weekly'});
+  const sf=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const allDims={...DEFAULT_DIMS,...state.dimensions};
+  const toggleDone=(type,id)=>setState(s=>({...s,goals:{...s.goals,[type]:s.goals[type].map(g=>g.id===id?{...g,done:!g.done,progress:!g.done?100:g.progress}:g)}}));
+  const updatePct=(type,id,val)=>setState(s=>({...s,goals:{...s.goals,[type]:s.goals[type].map(g=>g.id===id?{...g,progress:parseInt(val)}:g)}}));
+  const delGoal=(type,id)=>{setState(s=>({...s,goals:{...s.goals,[type]:s.goals[type].filter(g=>g.id!==id)}}));toast('Goal removed','info');};
+  const addGoal=()=>{
+    if(!form.text.trim())return;
+    setState(s=>({...s,goals:{...s.goals,[form.type]:[...s.goals[form.type],{id:uid(),text:form.text.trim(),dim:form.dim,done:false,progress:0}]}}));
+    setShowModal(false);setForm({text:'',dim:'technical',type:'weekly'});toast('Goal added','success');
+  };
+  const GoalList=({type,goals})=>(
+    <div className="card mb16">
+      {goals.length===0&&<div className="f13 c3" style={{padding:'10px 0'}}>No {type} goals yet.</div>}
+      {goals.map(g=>{
+        const col=dimColor(allDims,g.dim);
+        return(
+          <div key={g.id} style={{padding:'12px 0',borderBottom:'1px solid var(--b1)'}}>
+            <div className="flex jb is mb8 g10">
+              <div className="flex g8 ic" style={{flex:1,minWidth:0}}><DimDot dim={g.dim} dims={allDims} size={8}/><div className="f13 w5 trunc" style={g.done?{textDecoration:'line-through',color:'var(--t3)'}:{}}>{g.text}</div></div>
+              <div className="flex g6 ic" style={{flexShrink:0}}>
+                <button className="btn btn-g btn-xs" onClick={()=>toggleDone(type,g.id)}>{g.done?'Undo':'Done'}</button>
+                <button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)'}} onClick={()=>delGoal(type,g.id)}>{IC.trash}</button>
+              </div>
+            </div>
+            <div className="flex ic g10">
+              <div style={{flex:1}}><ProgBar value={g.progress} color={col} showPct={false}/></div>
+              <input type="range" min="0" max="100" step="5" value={g.progress} onChange={e=>updatePct(type,g.id,e.target.value)} style={{width:80,padding:0,background:'transparent',border:'none',height:4}}/>
+              <div className="mono f11 c3" style={{width:30,textAlign:'right'}}>{g.progress}%</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Goals</div><div className="ps">Weekly and monthly targets across all dimensions</div></div><button className="btn btn-p btn-sm" onClick={()=>setShowModal(true)}>{IC.plus} Add Goal</button></div>
+      <div className="card-title">Weekly Goals — {state.goals.weekly.filter(g=>g.done).length}/{state.goals.weekly.length} done</div>
+      <GoalList type="weekly" goals={state.goals.weekly}/>
+      <div className="card-title">Monthly Goals — {state.goals.monthly.filter(g=>g.done).length}/{state.goals.monthly.length} done</div>
+      <GoalList type="monthly" goals={state.goals.monthly}/>
+      {showModal&&(
+        <Modal title="Add Goal" onClose={()=>setShowModal(false)}>
+          <div className="fr"><label className="fl">Goal</label><input autoFocus value={form.text} onChange={e=>sf('text',e.target.value)} placeholder="What do you want to achieve?" onKeyDown={e=>e.key==='Enter'&&addGoal()}/></div>
+          <div className="g2 g10"><div className="fr"><label className="fl">Dimension</label><DimSel value={form.dim} onChange={v=>sf('dim',v)} dims={state.dimensions}/></div><div className="fr"><label className="fl">Type</label><select value={form.type} onChange={e=>sf('type',e.target.value)}><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>
+          <div className="flex g8 mt16"><button className="btn btn-p" onClick={addGoal} disabled={!form.text.trim()}>Add Goal</button><button className="btn btn-g" onClick={()=>setShowModal(false)}>Cancel</button></div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── CHECKLISTS ───────────────────────────────────────────────────────────────
+const LIST_META={
+  morning:{label:'Morning Ritual',color:'var(--purple)',accent:'tp'},
+  trading:{label:'Pre-Trade Gate',color:'var(--amber)',accent:'ta'},
+  evening:{label:'Evening Wind-Down',color:'var(--blue)',accent:'tb'},
+  vices:{label:'Vice Resistance',color:'var(--red)',accent:'tr'},
+};
+
+function Checklists({state,setState,toast}){
+  const[addingItem,setAddingItem]=useState(null);
+  const[newItemText,setNewItemText]=useState('');
+  const[addingList,setAddingList]=useState(false);
+  const[newList,setNewList]=useState({label:'',color:'#8b6fd4'});
+  const toggleItem=(lk,id,isCustom=false)=>{
+    if(isCustom){setState(s=>({...s,customChecklistState:{...s.customChecklistState,[lk]:{...(s.customChecklistState[lk]||{}),[id]:!(s.customChecklistState[lk]||{})[id]}}}));}
+    else{setState(s=>({...s,checklistState:{...s.checklistState,[lk]:{...s.checklistState[lk],[id]:!s.checklistState[lk]?.[id]}}}));}
+  };
+  const resetList=(lk,isCustom=false)=>{
+    if(isCustom)setState(s=>({...s,customChecklistState:{...s.customChecklistState,[lk]:{}}}));
+    else setState(s=>({...s,checklistState:{...s.checklistState,[lk]:{}}}));
+    toast('Checklist reset','info');
+  };
+  const addItem=(lk,isCustom=false)=>{
+    if(!newItemText.trim())return;
+    const ni={id:uid(),text:newItemText.trim()};
+    if(isCustom)setState(s=>({...s,customChecklists:s.customChecklists.map(cl=>cl.id===lk?{...cl,items:[...cl.items,ni]}:cl)}));
+    else setState(s=>({...s,checklists:{...s.checklists,[lk]:[...s.checklists[lk],ni]}}));
+    setNewItemText('');setAddingItem(null);toast('Item added','success');
+  };
+  const removeItem=(lk,id,isCustom=false)=>{
+    if(isCustom)setState(s=>({...s,customChecklists:s.customChecklists.map(cl=>cl.id===lk?{...cl,items:cl.items.filter(i=>i.id!==id)}:cl)}));
+    else setState(s=>({...s,checklists:{...s.checklists,[lk]:s.checklists[lk].filter(i=>i.id!==id)}}));
+  };
+  const addCustomList=()=>{
+    if(!newList.label.trim())return;
+    setState(s=>({...s,customChecklists:[...(s.customChecklists||[]),{id:uid(),label:newList.label.trim(),color:newList.color,items:[]}]}));
+    setNewList({label:'',color:'#8b6fd4'});setAddingList(false);toast('Checklist created','success');
+  };
+  const removeCustomList=id=>{
+    if(!window.confirm('Remove this checklist?'))return;
+    setState(s=>({...s,customChecklists:s.customChecklists.filter(cl=>cl.id!==id)}));
+  };
+  const CList=({lk,items,meta,checkState,isCustom,customColor})=>{
+    const done=items.filter(c=>checkState?.[c.id]).length;
+    const pct=items.length?Math.round(done/items.length*100):0;
+    const col=customColor||meta?.color||'var(--purple)';
+    const isAdding=addingItem===lk;
+    return(
+      <div className="card mb16">
+        <div className="flex jb ic mb10">
+          <div className="w6 f14" style={{color:col}}>{meta?.label||lk}</div>
+          <div className="flex g8 ic">
+            <span className={`tag ${meta?.accent||'tp'}`}>{done}/{items.length}</span>
+            <button className="btn btn-g btn-xs" onClick={()=>resetList(lk,isCustom)}>Reset</button>
+            {isCustom&&<button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)'}} onClick={()=>removeCustomList(lk)}>{IC.trash}</button>}
+          </div>
+        </div>
+        <ProgBar value={pct} color={col} showPct={false}/>
+        <div className="mt10">
+          {items.map(c=>(
+            <div key={c.id} className="flex ic g4u">
+              <div style={{flex:1}}><ChkRow text={c.text} done={!!checkState?.[c.id]} accent={col} onChange={()=>toggleItem(lk,c.id,isCustom)}/></div>
+              <button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)',opacity:.5,marginLeft:4}} onClick={()=>removeItem(lk,c.id,isCustom)}>{IC.trash}</button>
+            </div>
+          ))}
+        </div>
+        {isAdding?(
+          <div className="flex g8 mt10">
+            <input autoFocus value={newItemText} onChange={e=>setNewItemText(e.target.value)} placeholder="New item…" onKeyDown={e=>{if(e.key==='Enter')addItem(lk,isCustom);if(e.key==='Escape'){setAddingItem(null);setNewItemText('');}}}/>
+            <button className="btn btn-p btn-sm" onClick={()=>addItem(lk,isCustom)}>Add</button>
+            <button className="btn btn-g btn-sm" onClick={()=>{setAddingItem(null);setNewItemText('');}}>Cancel</button>
+          </div>
+        ):(
+          <button className="btn btn-g btn-xs mt10" onClick={()=>{setAddingItem(lk);setNewItemText('');}}>{IC.plus} Add item</button>
+        )}
+      </div>
+    );
+  };
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Checklists</div><div className="ps">Daily rituals · trade gate · vice resistance · add your own</div></div><button className="btn btn-p btn-sm" onClick={()=>setAddingList(true)}>{IC.plus} New List</button></div>
+      <div className="g2">
+        <div>{Object.entries(LIST_META).slice(0,2).map(([k,m])=><CList key={k} lk={k} items={state.checklists[k]} meta={m} checkState={state.checklistState[k]} isCustom={false}/>)}{(state.customChecklists||[]).filter((_,i)=>i%2===0).map(cl=><CList key={cl.id} lk={cl.id} items={cl.items} meta={{label:cl.label,accent:'tp'}} checkState={state.customChecklistState?.[cl.id]} isCustom={true} customColor={cl.color}/>)}</div>
+        <div>{Object.entries(LIST_META).slice(2).map(([k,m])=><CList key={k} lk={k} items={state.checklists[k]} meta={m} checkState={state.checklistState[k]} isCustom={false}/>)}{(state.customChecklists||[]).filter((_,i)=>i%2===1).map(cl=><CList key={cl.id} lk={cl.id} items={cl.items} meta={{label:cl.label,accent:'tp'}} checkState={state.customChecklistState?.[cl.id]} isCustom={true} customColor={cl.color}/>)}</div>
+      </div>
+      {addingList&&(
+        <Modal title="Create Checklist" onClose={()=>setAddingList(false)}>
+          <div className="fr"><label className="fl">List name</label><input autoFocus value={newList.label} onChange={e=>setNewList(l=>({...l,label:e.target.value}))} placeholder="e.g. Weekly Review"/></div>
+          <div className="fr"><label className="fl">Accent colour</label><ColPick value={newList.color} onChange={c=>setNewList(l=>({...l,color:c}))}/></div>
+          <div className="flex g8 mt16"><button className="btn btn-p" onClick={addCustomList} disabled={!newList.label.trim()}>Create</button><button className="btn btn-g" onClick={()=>setAddingList(false)}>Cancel</button></div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── NOTES ────────────────────────────────────────────────────────────────────
+function Notes({state,setState,toast}){
+  const[form,setForm]=useState({title:'',body:'',dim:'technical',session:'',tags:''});
+  const[filter,setFilter]=useState('all');
+  const[search,setSearch]=useState('');
+  const[expanded,setExpanded]=useState(null);
+  const sf=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const allDims={...DEFAULT_DIMS,...state.dimensions};
+  const saveNote=()=>{
+    if(!form.title.trim()||!form.body.trim()){toast('Title and body required','error');return;}
+    const note={id:uid(),title:form.title.trim(),body:form.body.trim(),dim:form.dim,session:form.session,date:todayKey(),tags:form.tags.split(',').map(t=>t.trim()).filter(Boolean),pinned:false};
+    setState(s=>({...s,notes:[note,...s.notes]}));
+    setForm({title:'',body:'',dim:'technical',session:'',tags:''});toast('Note saved','success');
+  };
+  const delNote=id=>{setState(s=>({...s,notes:s.notes.filter(n=>n.id!==id)}));toast('Note deleted','info');};
+  const pinNote=id=>setState(s=>({...s,notes:s.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n)}));
+  const sorted=[...state.notes].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+  const filtered=sorted.filter(n=>filter==='all'||n.dim===filter).filter(n=>!search||n.title.toLowerCase().includes(search.toLowerCase())||n.body.toLowerCase().includes(search.toLowerCase()));
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Notes</div><div className="ps">Session-linked · tagged · searchable · pinnable</div></div></div>
+      <div className="g2">
+        <div className="card">
+          <div className="card-title">New Note</div>
+          <div className="fr"><label className="fl">Title</label><input value={form.title} onChange={e=>sf('title',e.target.value)} placeholder="Note title…"/></div>
+          <div className="fr"><label className="fl">Content</label><textarea value={form.body} onChange={e=>sf('body',e.target.value)} placeholder="Your thoughts, insights, lessons…" style={{minHeight:110}}/></div>
+          <div className="g2 g10">
+            <div className="fr"><label className="fl">Linked Session</label><select value={form.session} onChange={e=>sf('session',e.target.value)}><option value="">— None —</option>{state.schedule.map(b=><option key={b.id} value={b.title}>{b.title}</option>)}</select></div>
+            <div className="fr"><label className="fl">Dimension</label><DimSel value={form.dim} onChange={v=>sf('dim',v)} dims={state.dimensions}/></div>
+          </div>
+          <div className="fr"><label className="fl">Tags (comma-separated)</label><input value={form.tags} onChange={e=>sf('tags',e.target.value)} placeholder="lab, cybersec, insight…"/></div>
+          <button className="btn btn-p w100" onClick={saveNote}>Save Note</button>
+        </div>
+        <div>
+          <div className="flex g8 mb12 wrap">
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" style={{flex:1,minWidth:140}}/>
+            <select value={filter} onChange={e=>setFilter(e.target.value)} style={{width:130}}><option value="all">All</option>{Object.entries(allDims).map(([k,d])=><option key={k} value={k}>{d.label}</option>)}</select>
+          </div>
+          {filtered.length===0&&<div className="f13 c3 tc" style={{padding:'24px 0'}}>No notes found.</div>}
+          {filtered.map(n=>(
+            <div key={n.id} className={`note${n.pinned?' pinned':''}`}>
+              <div className="flex g8 ic mb4">
+                <DimDot dim={n.dim} dims={allDims}/>
+                <div className="note-title" style={{flex:1}} onClick={()=>setExpanded(expanded===n.id?null:n.id)}>{n.title}</div>
+                <button className="btn btn-g btn-xs btn-ic" onClick={()=>pinNote(n.id)} style={{color:n.pinned?'var(--amber2)':'var(--t4)'}}>{IC.pin}</button>
+                <button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)'}} onClick={()=>delNote(n.id)}>{IC.trash}</button>
+              </div>
+              <div className="note-body" onClick={()=>setExpanded(expanded===n.id?null:n.id)} style={{maxHeight:expanded===n.id?'none':60,overflow:'hidden',cursor:'pointer'}}>{n.body}</div>
+              {n.body.length>120&&<button className="btn btn-g btn-xs mt4" onClick={()=>setExpanded(expanded===n.id?null:n.id)}>{expanded===n.id?'Show less ↑':'Show more ↓'}</button>}
+              <div className="note-meta">
+                {n.session&&<span className="schip">{IC.link} {n.session}</span>}
+                <span className="f11 c3">{n.date}</span>
+                {(n.tags||[]).map(t=><span key={t} className="tag tp" style={{fontSize:10}}>{t}</span>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function Stats({state}){
+  const stats=useMemo(()=>computeStats(state),[state]);
+  const{profile,goals,dailyLogs,dimensions}=state;
+  const allDims={...DEFAULT_DIMS,...dimensions};
+  const today=todayKey();
+  const todayLog=dailyLogs[today]||{sessionLogs:[]};
+  const sorted=Object.entries(stats.dimScores).sort((a,b)=>b[1]-a[1]);
+  const strongest=sorted[0];
+  const weakest=sorted[sorted.length-1];
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Statistics</div><div className="ps">Real data from your logged sessions and completed goals</div></div></div>
+      <div className="g4 mb16">
+        <div className="stat-card"><div className="sv cg">{stats.consistency}%</div><div className="sl">Consistency</div></div>
+        <div className="stat-card"><div className="sv cp">{profile.streak??0}</div><div className="sl">Day Streak</div></div>
+        <div className="stat-card"><div className="sv cb">{stats.todaySessionCount}</div><div className="sl">Sessions Today</div></div>
+        <div className="stat-card"><div className="sv ca mono">{fmtSecs(stats.todaySecs)}</div><div className="sl">Time Today</div></div>
+      </div>
+      <div className="g2 mb16">
+        <div className="card">
+          <div className="card-title">Dimension Scores — This Week</div>
+          {sorted.map(([k,v])=>(
+            <div key={k} className="bar-row">
+              <div className="bar-lbl">{allDims[k]?.label||k}</div>
+              <div className="bar-track"><div className="bar-fill" style={{width:`${v}%`,background:allDims[k]?.color||'var(--purple)'}}/></div>
+              <div className="bar-pct" style={{color:v>=70?'var(--green2)':v>=40?'var(--amber2)':'var(--red2)'}}>{v}%</div>
+            </div>
+          ))}
+          {strongest&&weakest&&strongest[0]!==weakest[0]&&<><div className="div"/><div className="f12 c3">Strongest: <span className="cg">{allDims[strongest[0]]?.label} ({strongest[1]}%)</span> · Focus: <span className="cr">{allDims[weakest[0]]?.label} ({weakest[1]}%)</span></div></>}
+          {stats.consistency===0&&<div className="f12 c3 mt8" style={{padding:'10px 12px',background:'var(--bg3)',borderRadius:'var(--r2)'}}>Start logging sessions from the Schedule page to see real scores here.</div>}
+        </div>
+        <div className="card">
+          <div className="card-title">Consistency Heatmap — Last 35 Days</div>
+          <div className="heatmap mb8">{stats.heatmap.map((v,i)=><div key={i} className={`hc h${v}`}/>)}</div>
+          <div className="flex g8 ic mt8 mb16">{[0,1,2,3].map(v=><div key={v} className="flex g4u ic"><div className={`hc h${v}`} style={{width:13,height:13,borderRadius:3}}/><span className="f10 c3">{['None','Low','Good','Full'][v]}</span></div>)}</div>
+          <div className="card-title">Sessions per Day — This Week</div>
+          {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>(
+            <div key={d} className="bar-row">
+              <div className="bar-lbl">{d}</div>
+              <div className="bar-track"><div className="bar-fill" style={{width:`${Math.round((stats.days7[i]||0)/Math.max(...stats.days7,1)*100)}%`,background:'var(--blue)'}}/></div>
+              <div className="bar-pct">{stats.days7[i]||0}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="g2 mb16">
+        <div className="card"><div className="card-title">Weekly Goals — {stats.weeklyDone}/{stats.weeklyTotal}</div>{goals.weekly.map(g=><ProgBar key={g.id} value={g.progress} color={dimColor(allDims,g.dim)} label={g.text.slice(0,40)+(g.text.length>40?'…':'')}/>)}</div>
+        <div className="card"><div className="card-title">Monthly Goals — {stats.monthlyDone}/{stats.monthlyTotal}</div>{goals.monthly.map(g=><ProgBar key={g.id} value={g.progress} color={dimColor(allDims,g.dim)} label={g.text.slice(0,40)+(g.text.length>40?'…':'')}/>)}</div>
+      </div>
+      <div className="card">
+        <div className="card-title">Session Log — Today</div>
+        {todayLog.sessionLogs.length>0?todayLog.sessionLogs.map(s=>(
+          <div key={s.id} className="flex jb ic" style={{padding:'9px 0',borderBottom:'1px solid var(--b1)'}}>
+            <div><div className="f13 w5">{s.title}</div><div className="f11 c3">{s.start} → {s.end}</div></div>
+            <span className="tag tg mono">{s.duration}</span>
+          </div>
+        )):<div className="f13 c3 tc" style={{padding:'20px 0'}}>No sessions logged today. Start a block from Schedule to track time.</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── REMINDERS ────────────────────────────────────────────────────────────────
+const ALL_DAYS=['M','T','W','Th','F','Sa','Su'];
+function Reminders({state,setState,toast}){
+  const[showModal,setShowModal]=useState(false);
+  const[form,setForm]=useState({label:'',time:'07:00',days:['M','T','W','Th','F']});
+  const toggle=id=>setState(s=>({...s,reminders:s.reminders.map(r=>r.id===id?{...r,on:!r.on}:r)}));
+  const del=id=>setState(s=>({...s,reminders:s.reminders.filter(r=>r.id!==id)}));
+  const add=()=>{
+    if(!form.label.trim())return;
+    setState(s=>({...s,reminders:[...s.reminders,{id:uid(),label:form.label.trim(),time:form.time,on:true,days:form.days}]}));
+    setShowModal(false);setForm({label:'',time:'07:00',days:['M','T','W','Th','F']});toast('Reminder added','success');
+  };
+  const tDay=d=>setForm(f=>({...f,days:f.days.includes(d)?f.days.filter(x=>x!==d):[...f.days,d]}));
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Reminders</div><div className="ps">Ritual enforcement · session alerts · weekly anchors</div></div><button className="btn btn-p btn-sm" onClick={()=>setShowModal(true)}>{IC.plus} Add</button></div>
+      <div className="card mb16">
+        <div className="card-title">Active Reminders</div>
+        {state.reminders.length===0&&<div className="f13 c3">No reminders yet.</div>}
+        {state.reminders.map(r=>(
+          <div key={r.id} className="rem-row">
+            <Toggle on={r.on} onChange={()=>toggle(r.id)}/>
+            <div className="rem-time">{r.time}</div>
+            <div style={{flex:1}}><div className="w5 f13">{r.label}</div><div className="rem-days">{r.days.join(' · ')}</div></div>
+            <span className={`tag ${r.on?'tg':'td'}`}>{r.on?'ON':'OFF'}</span>
+            <button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)'}} onClick={()=>del(r.id)}>{IC.trash}</button>
+          </div>
+        ))}
+      </div>
+      <div className="card card-sm"><div className="f12 c3">Reminders are stored here and displayed as in-app alerts. To receive push notifications, install Life OS as a PWA and grant notification permission.</div></div>
+      {showModal&&(
+        <Modal title="Add Reminder" onClose={()=>setShowModal(false)}>
+          <div className="fr"><label className="fl">Label</label><input autoFocus value={form.label} onChange={e=>setForm(f=>({...f,label:e.target.value}))} placeholder="e.g. Morning ritual"/></div>
+          <div className="fr"><label className="fl">Time</label><input type="time" value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))}/></div>
+          <div className="fr"><label className="fl">Days</label><div className="flex g6 wrap">{ALL_DAYS.map(d=><button key={d} className={`btn btn-xs ${form.days.includes(d)?'btn-p':'btn-g'}`} onClick={()=>tDay(d)}>{d}</button>)}</div></div>
+          <div className="flex g8 mt16"><button className="btn btn-p" onClick={add} disabled={!form.label.trim()}>Add Reminder</button><button className="btn btn-g" onClick={()=>setShowModal(false)}>Cancel</button></div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── APPS ─────────────────────────────────────────────────────────────────────
+function Apps({state,setState,toast}){
+  const[showAdd,setShowAdd]=useState(false);
+  const[editApp,setEditApp]=useState(null);
+  const[form,setForm]=useState({id:'',name:'',desc:'',emoji:'🔗',url:'',color:'#3d82e8'});
+  const openApp=url=>{if(url)window.open(url,'_blank');else toast('No URL set for this app','info');};
+  const delApp=id=>setState(s=>({...s,apps:s.apps.filter(a=>a.id!==id)}));
+  const saveApp=a=>{
+    setState(s=>{const ex=s.apps.find(x=>x.id===a.id);return{...s,apps:ex?s.apps.map(x=>x.id===a.id?a:x):[...s.apps,a]};});
+    setShowAdd(false);setEditApp(null);toast('App saved','success');
+  };
+  const AppEd=({app,onSave,onClose})=>{
+    const[f,setF]=useState({...app});
+    return(
+      <Modal title={app.name?'Edit App':'Add App'} onClose={onClose}>
+        <div className="fr"><label className="fl">App Name</label><input autoFocus value={f.name} onChange={e=>setF(x=>({...x,name:e.target.value}))} placeholder="e.g. Notion"/></div>
+        <div className="g2 g10"><div className="fr"><label className="fl">Emoji</label><input value={f.emoji} onChange={e=>setF(x=>({...x,emoji:e.target.value}))} style={{width:80}} maxLength={4}/></div><div className="fr"><label className="fl">Colour</label><ColPick value={f.color} onChange={c=>setF(x=>({...x,color:c}))}/></div></div>
+        <div className="fr"><label className="fl">URL</label><input value={f.url} onChange={e=>setF(x=>({...x,url:e.target.value}))} placeholder="https://…"/></div>
+        <div className="fr"><label className="fl">Description</label><input value={f.desc} onChange={e=>setF(x=>({...x,desc:e.target.value}))} placeholder="What is this?"/></div>
+        <div className="flex g8 mt16"><button className="btn btn-p" onClick={()=>onSave(f)} disabled={!f.name.trim()}>Save App</button><button className="btn btn-g" onClick={onClose}>Cancel</button></div>
+      </Modal>
+    );
+  };
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Connected Apps</div><div className="ps">Quick-launch your tool ecosystem · add any URL</div></div><button className="btn btn-p btn-sm" onClick={()=>{setForm({id:uid(),name:'',desc:'',emoji:'🔗',url:'',color:'#3d82e8'});setShowAdd(true);}}>{IC.plus} Add App</button></div>
+      <div className="gauto">
+        {state.apps.map(a=>(
+          <div key={a.id} className="ext-card">
+            <div style={{position:'absolute',top:8,right:8,display:'flex',gap:4}}>
+              <button className="btn btn-g btn-xs btn-ic" style={{opacity:.5}} onClick={e=>{e.stopPropagation();setEditApp(a);}}>{IC.edit}</button>
+              <button className="btn btn-g btn-xs btn-ic" style={{opacity:.5}} onClick={e=>{e.stopPropagation();delApp(a.id);}}>{IC.trash}</button>
+            </div>
+            <div className="ext-icon" style={{background:a.color+'22',fontSize:22}}>{a.emoji}</div>
+            <div className="ext-name" onClick={()=>openApp(a.url)}>{a.name}</div>
+            <div className="ext-desc">{a.desc}</div>
+          </div>
+        ))}
+      </div>
+      {(showAdd||editApp)&&<AppEd app={editApp||form} onSave={saveApp} onClose={()=>{setShowAdd(false);setEditApp(null);}}/>}
+    </div>
+  );
+}
+
+// ─── WORKSPACE ────────────────────────────────────────────────────────────────
+function Workspace({state,setState,toast}){
+  const[showAddDim,setShowAddDim]=useState(false);
+  const[newDim,setNewDim]=useState({key:'',label:'',color:'#8b6fd4',emoji:'✨'});
+  const fileRef=useRef(null);
+  const allDims={...DEFAULT_DIMS,...state.dimensions};
+  const updDim=(key,field,val)=>setState(s=>({...s,dimensions:{...s.dimensions,[key]:{...(s.dimensions[key]||DEFAULT_DIMS[key]||{}),[field]:val}}}));
+  const addDim=()=>{
+    if(!newDim.key.trim()||!newDim.label.trim())return;
+    const k=newDim.key.toLowerCase().replace(/\s+/g,'_');
+    setState(s=>({...s,dimensions:{...s.dimensions,[k]:{label:newDim.label,color:newDim.color,emoji:newDim.emoji}}}));
+    setNewDim({key:'',label:'',color:'#8b6fd4',emoji:'✨'});setShowAddDim(false);toast('Dimension added','success');
+  };
+  const remDim=key=>{
+    if(DEFAULT_DIMS[key]){toast('Cannot remove a built-in dimension','error');return;}
+    setState(s=>{const d={...s.dimensions};delete d[key];return{...s,dimensions:d};});
+    toast('Dimension removed','info');
+  };
+  const exportData=()=>{
+    const{isUnlocked,...data}=state;
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`lifeOS-backup-${todayKey()}.json`;a.click();
+    toast('Backup downloaded','success');
+  };
+  const handleImport=e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const data=JSON.parse(ev.target.result);
+        const merged=deepMerge(DEFAULT_STATE,data);
+        merged.isUnlocked=false;
+        setState(()=>merged);
+        toast('Data imported successfully','success');
+      }catch{toast('Import failed — invalid file','error');}
+    };
+    reader.readAsText(file);
+    e.target.value='';
+  };
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Workspace</div><div className="ps">Customise dimensions · import & export data</div></div><button className="btn btn-p btn-sm" onClick={()=>setShowAddDim(true)}>{IC.plus} Add Dimension</button></div>
+      <div className="card mb16">
+        <div className="card-title">Life Dimensions</div>
+        <div className="f12 c3 mb12">Colours and labels apply everywhere — schedule, goals, notes, and stats.</div>
+        {Object.entries(allDims).map(([key,d])=>(
+          <div key={key} className="ed-row">
+            <ColPick value={d.color||'#8b6fd4'} onChange={c=>updDim(key,'color',c)}/>
+            <input value={d.emoji||'✨'} onChange={e=>updDim(key,'emoji',e.target.value)} maxLength={4} style={{width:32,textAlign:'center',padding:'4px 2px',background:'transparent',border:'none',color:'var(--t1)',fontSize:18}}/>
+            <input value={d.label||key} onChange={e=>updDim(key,'label',e.target.value)} style={{flex:1,background:'transparent',border:'none',borderBottom:'1px solid var(--b2)',borderRadius:0,padding:'4px 4px'}}/>
+            <span className="f11 mono c4" style={{width:90,textAlign:'right'}}>{key}</span>
+            {!DEFAULT_DIMS[key]&&<button className="btn btn-g btn-xs btn-ic" style={{color:'var(--t4)'}} onClick={()=>remDim(key)}>{IC.trash}</button>}
+          </div>
+        ))}
+      </div>
+      <div className="g2">
+        <div className="card"><div className="card-title">Export Data</div><div className="f13 c2 mb12">Download a full backup of all your Life OS data as a JSON file.</div><button className="btn btn-p" onClick={exportData}>{IC.dl} Export Backup</button></div>
+        <div className="card"><div className="card-title">Import Data</div><div className="f13 c2 mb12">Restore from a previous backup. This will overwrite all current data.</div><input ref={fileRef} type="file" accept=".json" onChange={handleImport} style={{display:'none'}}/><button className="btn btn-g" onClick={()=>fileRef.current?.click()}>{IC.ul} Import Backup</button></div>
+      </div>
+      {showAddDim&&(
+        <Modal title="Add Dimension" onClose={()=>setShowAddDim(false)}>
+          <div className="fr"><label className="fl">Key (internal ID, no spaces)</label><input autoFocus value={newDim.key} onChange={e=>setNewDim(d=>({...d,key:e.target.value.toLowerCase().replace(/\s+/g,'_')}))} placeholder="e.g. finances"/></div>
+          <div className="fr"><label className="fl">Display Label</label><input value={newDim.label} onChange={e=>setNewDim(d=>({...d,label:e.target.value}))} placeholder="e.g. Finances"/></div>
+          <div className="g2 g10"><div className="fr"><label className="fl">Emoji</label><input value={newDim.emoji} onChange={e=>setNewDim(d=>({...d,emoji:e.target.value}))} maxLength={4} style={{width:80}}/></div><div className="fr"><label className="fl">Colour</label><ColPick value={newDim.color} onChange={c=>setNewDim(d=>({...d,color:c}))}/></div></div>
+          <div className="flex g8 mt16"><button className="btn btn-p" onClick={addDim} disabled={!newDim.key.trim()||!newDim.label.trim()}>Add Dimension</button><button className="btn btn-g" onClick={()=>setShowAddDim(false)}>Cancel</button></div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── PROFILE ──────────────────────────────────────────────────────────────────
+function Profile({state,setState,toast}){
+  const[form,setForm]=useState({...state.profile});
+  const[pinForm,setPinForm]=useState({current:'',newPin:'',confirm:''});
+  const[pinMsg,setPinMsg]=useState('');
+  const sf=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const saveProfile=()=>{setState(s=>({...s,profile:{...s.profile,...form}}));toast('Profile saved','success');};
+  const changePin=()=>{
+    if(pinForm.current!==state.pin){setPinMsg('Current PIN is incorrect');return;}
+    if(!/^\d{4}$/.test(pinForm.newPin)){setPinMsg('New PIN must be exactly 4 digits');return;}
+    if(pinForm.newPin!==pinForm.confirm){setPinMsg('PINs do not match');return;}
+    setState(s=>({...s,pin:pinForm.newPin}));
+    setPinForm({current:'',newPin:'',confirm:''});setPinMsg('✓ PIN updated');toast('PIN updated','success');
+  };
+  const handleClear=()=>{if(window.confirm('Permanently erase all Life OS data? This cannot be undone.')){clearState();window.location.reload();}};
+  return(
+    <div className="page">
+      <div className="ph"><div><div className="pt">Profile & Security</div><div className="ps">Identity · PIN · privacy · session data</div></div></div>
+      <div className="g2">
+        <div>
+          <div className="card mb16">
+            <div className="flex g16 ic mb20">
+              <div className="avatar" style={{width:52,height:52,fontSize:18}}>{form.initials||'?'}</div>
+              <div><div className="w6 f16">{form.name}</div><div className="f12 c3 mt4">{form.bio}</div></div>
+            </div>
+            <div className="fr"><label className="fl">Display Name</label><input value={form.name} onChange={e=>sf('name',e.target.value)}/></div>
+            <div className="fr"><label className="fl">Initials (2 chars)</label><input value={form.initials} maxLength={2} onChange={e=>sf('initials',e.target.value.toUpperCase())} style={{width:80}}/></div>
+            <div className="fr"><label className="fl">Primary Mission</label><input value={form.goal} onChange={e=>sf('goal',e.target.value)} placeholder="e.g. Cybersecurity · 6 months"/></div>
+            <div className="fr"><label className="fl">Bio</label><textarea value={form.bio} onChange={e=>sf('bio',e.target.value)} style={{minHeight:60}}/></div>
+            <div className="fr"><label className="fl">Current Streak (days)</label><input type="number" min="0" value={form.streak??0} onChange={e=>sf('streak',parseInt(e.target.value)||0)} style={{width:100}}/></div>
+            <button className="btn btn-p" onClick={saveProfile}>Save Profile</button>
+          </div>
+        </div>
+        <div>
+          <div className="card mb16">
+            <div className="card-title">PIN Security</div>
+            <div className="f13 c2 mb16">The app locks automatically when you close or refresh it.</div>
+            <div className="fr"><label className="fl">Current PIN</label><input type="password" maxLength={4} value={pinForm.current} onChange={e=>setPinForm(f=>({...f,current:e.target.value}))} style={{width:120,fontFamily:'var(--font-mono)',letterSpacing:'.3em'}} placeholder="• • • •"/></div>
+            <div className="g2 g10">
+              <div className="fr"><label className="fl">New PIN</label><input type="password" maxLength={4} value={pinForm.newPin} onChange={e=>setPinForm(f=>({...f,newPin:e.target.value.replace(/\D/g,'')}))} placeholder="• • • •" style={{fontFamily:'var(--font-mono)',letterSpacing:'.3em'}}/></div>
+              <div className="fr"><label className="fl">Confirm</label><input type="password" maxLength={4} value={pinForm.confirm} onChange={e=>setPinForm(f=>({...f,confirm:e.target.value.replace(/\D/g,'')}))} placeholder="• • • •" style={{fontFamily:'var(--font-mono)',letterSpacing:'.3em'}}/></div>
+            </div>
+            {pinMsg&&<div className={`f12 mb8 ${pinMsg.startsWith('✓')?'cg':'cr'}`}>{pinMsg}</div>}
+            <button className="btn btn-p btn-sm" onClick={changePin}>Update PIN</button>
+          </div>
+          <div className="card mb16">
+            <div className="card-title">Privacy & Storage</div>
+            <div className="f13 c2 mb12">All data stored locally in your browser. Nothing leaves your device.</div>
+            {[['Notes',state.notes.length],['Goals',state.goals.weekly.length+state.goals.monthly.length],['Apps linked',state.apps.length],['Version',VER]].map(([l,v])=>(
+              <div key={l} className="flex jb ic f13" style={{padding:'7px 0',borderTop:'1px solid var(--b1)'}}><span className="c3">{l}</span><span className="mono">{v}</span></div>
+            ))}
+            <div className="div"/>
+            <button className="btn btn-r btn-sm" onClick={handleClear}>Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ROOT APP ─────────────────────────────────────────────────────────────────
+function App(){
+  const[state,setStateRaw]=useState(()=>loadState());
+  const[page,setPage]=useState('dashboard');
+  const[sidebarOpen,setSidebarOpen]=useState(false);
+  const{toasts,toast}=useToast();
+  const setState=useCallback(updater=>{
+    setStateRaw(prev=>{
+      const next=typeof updater==='function'?updater(prev):updater;
+      saveState(next);
+      return next;
+    });
+  },[]);
+  // Auto-reset checklists on new day
+  useEffect(()=>{
+    const today=todayKey();
+    if(state.checklistDate!==today){
+      setState(s=>({...s,checklistDate:today,checklistState:{morning:{},trading:{},evening:{},vices:{}},customChecklistState:{}}));
+    }
+  },[]);
+  const totalItems=Object.values(state.checklists).flat().length+(state.customChecklists||[]).reduce((a,b)=>a+b.items.length,0);
+  const doneItems=Object.values(state.checklistState).flatMap(o=>Object.values(o)).filter(Boolean).length+Object.values(state.customChecklistState||{}).flatMap(o=>Object.values(o)).filter(Boolean).length;
+  const checkRem=totalItems-doneItems;
+  // Onboarding
+  if(state.firstRun){
+    return(
+      <>
+        <Onboarding onComplete={data=>{
+          setState(s=>({...s,firstRun:false,pin:data.pin,profile:{...s.profile,name:data.name,initials:data.initials,goal:data.goal,bio:data.bio},schedule:data.defSched?s.schedule:[],goals:data.defGoals?s.goals:{weekly:[],monthly:[]},notes:data.defGoals?s.notes:[]}));
+        }}/>
+        <Toasts toasts={toasts}/>
+      </>
+    );
+  }
+  // PIN lock
+  if(!state.isUnlocked){
+    return(
+      <>
+        <PinLock storedPin={state.pin} onUnlock={()=>setState(s=>({...s,isUnlocked:true}))}/>
+        <Toasts toasts={toasts}/>
+      </>
+    );
+  }
+  const pp={state,setState,setPage,toast};
+  const pages={
+    dashboard:<Dashboard {...pp}/>,
+    schedule:<Schedule {...pp}/>,
+    focus:<Focus {...pp}/>,
+    goals:<Goals {...pp}/>,
+    checklist:<Checklists {...pp}/>,
+    notes:<Notes {...pp}/>,
+    stats:<Stats {...pp}/>,
+    reminders:<Reminders {...pp}/>,
+    apps:<Apps {...pp}/>,
+    workspace:<Workspace {...pp}/>,
+    profile:<Profile {...pp}/>,
+  };
+  return(
+    <>
+      <div className="mobile-bar">
+        <div className="mobile-logo">LIFE<span> OS</span></div>
+        <div className="flex ic g8">
+          <div className="f12 c3 mono">{new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+          <div className="hamburger" onClick={()=>setSidebarOpen(o=>!o)}><span/><span/><span/></div>
+        </div>
+      </div>
+      <div className={`overlay${sidebarOpen?' open':''}`} onClick={()=>setSidebarOpen(false)}/>
+      <div className="app">
+        <Sidebar page={page} setPage={setPage} state={state} checkRem={checkRem} open={sidebarOpen} onClose={()=>setSidebarOpen(false)}/>
+        <main className="main">{pages[page]||pages.dashboard}</main>
+      </div>
+      <Toasts toasts={toasts}/>
+    </>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+</script>
+</body>
+</html>
